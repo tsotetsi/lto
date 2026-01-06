@@ -1,0 +1,59 @@
+# Extension fields for reuse
+x-common-environment: &common-env
+  LOG_LEVEL: info
+  API_URL: http://backend:8000
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      ENVIRONMENT: development
+    ports:
+      - "8000:8000"
+    volumes:
+      # Hot reload in development.
+      - ./backend:/app
+    secrets:
+      - db_password
+    networks:
+      - lto_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      <<: *common-env
+      NEXT_PUBLIC_API_URL: http://localhost:8000 # Browser-side URL
+      NODE_ENV: development
+    volumes:
+      # Hot reload in development.
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - lto_network
+
+networks:
+  lto_network:
+    driver: bridge
+    name: lto_network
+
+secrets:
+  db_password:
+    file: .secrets/db_password.txt
