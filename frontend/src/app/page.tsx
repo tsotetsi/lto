@@ -33,25 +33,40 @@ export default function CVEditor() {
   const lastCompiledFontRef = useRef<string>(AVAILABLE_FONTS[0]); // Initialize with your default font
   const currentUrlRef = useRef<string | null>(null);
 
-  // Try loading from localStorage on mount
+  // Try loading from localStorage on mount.
   useEffect(() => {
     const savedCode = localStorage.getItem(STORAGE_KEYS.CODE);
     const savedFont = localStorage.getItem(STORAGE_KEYS.FONT);
 
     if (savedCode) setCode(savedCode);
-    else setCode('% Welcome! Start your CV here...\n\\documentclass{article}\n\\begin{document}\nHello World\n\\end{document}');
+    else setCode(code);
 
     if (savedFont && AVAILABLE_FONTS.includes(savedFont)) setSelectedFont(savedFont);
     setIsInitialized(true);
   }, []);
 
+  // Save to localStorage whenever content changes.
+  useEffect(() => {
+    if (!isInitialized) return;
+    localStorage.setItem(STORAGE_KEYS.CODE, code);
+    localStorage.setItem(STORAGE_KEYS.FONT, selectedFont);
+  }, [code, selectedFont, isInitialized]);
+
   const compileLatex = useCallback(async (texContent: string, fontName: string) => {
-    // 1. Don't compile if the content hasn't changed
+    // Don't compile if the content hasn't changed
     if (texContent === lastCompiledCodeRef.current && fontName === lastCompiledFontRef.current) {
+      return;
+    }
+    // Show error if content is empty.
+    if (!texContent.trim()) {
+      setError('Empty document. Please add some content.');
+      setShowConsole(true);
+      setIsCompiling(false);
       return;
     }
 
     setIsCompiling(true);
+
     try {
       const response = await axios.post(
         'http://localhost:8000/compile',
@@ -123,6 +138,17 @@ export default function CVEditor() {
     }, 1000);
     return () => clearTimeout(timeout);
   }, [code, selectedFont, compileLatex]);
+
+  useEffect(() => {
+      if (!isInitialized) return;
+      const timeout = setTimeout(() => compileLatex(code, selectedFont), 1000);
+      return () => clearTimeout(timeout);
+    }, [code, selectedFont, compileLatex, isInitialized]);
+
+    // Don't render editor until we've loaded from localStorage to avoid flicker
+    if (!isInitialized) {
+      return <div className="h-screen w-screen bg-gray-900 flex items-center justify-center text-white">Loading Workspace...</div>;
+    }
 
   return (
     <main className="flex h-screen w-screen overflow-hidden bg-gray-900 text-white font-sans">

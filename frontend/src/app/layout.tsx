@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LaTeX CV Builder",
+  title: "Lethathamo | Resume/CV Builder",
   description: "Automated LaTeX CV Compiler",
 };
 
