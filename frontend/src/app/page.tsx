@@ -33,6 +33,21 @@ export default function CVEditor() {
   const lastCompiledFontRef = useRef<string>(AVAILABLE_FONTS[0]); // Initialize with your default font
   const currentUrlRef = useRef<string | null>(null);
 
+  const downloadPdf = () => {
+    if (!pdfUrl) return;
+
+    const date = new Date().toISOString().split('T')[0];
+    const fileName = `cv_${date}.pdf`;
+
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = fileName;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   // Try loading from localStorage on mount.
   useEffect(() => {
     const savedCode = localStorage.getItem(STORAGE_KEYS.CODE);
@@ -166,8 +181,18 @@ export default function CVEditor() {
             >
               {AVAILABLE_FONTS.map(f => <option key={f} value={f}>{f}</option>)}
             </select>
+            <button
+              onClick={downloadPdf}
+              disabled={!pdfUrl || isCompiling}
+              className={`inline-flex items-center justify-center gap-2 text-[10px] uppercase font-bold px-3 py-2 rounded transition-all whitespace-nowrap ${
+                !pdfUrl || isCompiling 
+                  ? 'bg-gray-800 text-gray-600 cursor-not-allowed' 
+                  : 'bg-green-700 hover:bg-green-600 text-white shadow-lg'
+              }`}
+            >
+              <span>Export CV</span>
+            </button>
           </div>
-
           <div className="flex items-center gap-3">
             {isCompiling && (
                 <div className="flex items-center gap-2">
