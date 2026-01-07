@@ -16,6 +16,33 @@ const AVAILABLE_FONTS = [
   "Fontin" // Bundled custom font.
 ];
 
+const RESUME_SNIPPETS = [
+  {
+    label: "Experience Block",
+    code: `\\section{Experience}
+\\textbf{Job Title} \\hfill City, Country \\\\
+\\textit{Company Name} \\hfill Month Year – Present
+\\begin{itemize}
+    \\item Developed a LaTeX-based CV automation tool using FastAPI and Next.js.
+    \\item Optimized Docker builds using multi-stage layers, reducing image size by 60\\%.
+\\end{itemize}\n`
+  },
+  {
+    label: "Education Block",
+    code: `\\section{Education}
+\\textbf{Degree Name} \\hfill University Name \\\\
+\\textit{Major/Specialization} \\hfill Month Year – Month Year\n`
+  },
+  {
+    label: "Skills Grid",
+    code: `\\section{Skills}
+\\begin{tabular}{ @{} >{\\bfseries}l @{\\hspace{6ex}} l }
+Languages & Python, TypeScript, C++, LaTeX \\\\
+Tools & Docker, Git, Next.js, FastAPI \\\\
+\\end{tabular}\n`
+  }
+];
+
 export default function CVEditor() {
   
   // Initialize with empty or default values.
@@ -28,10 +55,40 @@ export default function CVEditor() {
   const [isCompiling, setIsCompiling] = useState(false);
   const [showConsole, setShowConsole] = useState(false);
 
+  // Monaco Editor instance Ref.
+  const editorRef = useRef<any>(null);
+
   // Refs to track state without triggering re-renders or dependency loops.
   const lastCompiledCodeRef = useRef<string>('');
   const lastCompiledFontRef = useRef<string>(AVAILABLE_FONTS[0]); // Initialize with your default font
   const currentUrlRef = useRef<string | null>(null);
+
+  // Function to insert text at the current cursor position
+  const insertSnippet = (snippetCode: string) => {
+    if (!editorRef.current) return;
+
+    const editor = editorRef.current;
+    const selection = editor.getSelection();
+    const range = new (window as any).monaco.Range(
+      selection.startLineNumber,
+      selection.startColumn,
+      selection.endLineNumber,
+      selection.endColumn
+    );
+
+    // This method handles the insertion and supports Undo/Redo
+    editor.executeEdits("snippet-insert", [
+      { range: range, text: snippetCode, forceMoveMarkers: true }
+    ]);
+    
+    // Refresh the code state to trigger compilation.
+    setCode(editor.getValue());
+  };
+
+  // Capture editor instance on mount.
+  const handleEditorDidMount = (editor: any) => {
+    editorRef.current = editor;
+  };
 
   const downloadPdf = () => {
     if (!pdfUrl) return;
@@ -168,6 +225,26 @@ export default function CVEditor() {
   return (
     <main className="flex h-screen w-screen overflow-hidden bg-gray-900 text-white font-sans">
       {/* Left Column */}
+
+      {/* 1. Snippet Sidebar (New!) */}
+      <div className="w-48 bg-gray-950 border-r border-gray-800 flex flex-col shrink-0">
+        <div className="p-4 border-b border-gray-800">
+          <h2 className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Library</h2>
+        </div>
+        <div className="p-2 flex flex-col gap-2 overflow-y-auto">
+          {RESUME_SNIPPETS.map((snippet) => (
+            <button
+              key={snippet.label}
+              onClick={() => insertSnippet(snippet.code)}
+              className="text-left text-[11px] p-2 bg-gray-900 hover:bg-blue-900 border border-gray-800 rounded transition-colors group"
+            >
+              <span className="block font-medium">{snippet.label}</span>
+              <span className="text-[9px] text-gray-500 group-hover:text-blue-200">Click to insert</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="w-1/2 flex flex-col border-r border-gray-700 h-full">
         {/* Updated Header with Dropdown */}
         <div className="p-3 bg-gray-800 flex justify-between items-center shrink-0 border-b border-gray-700">
@@ -211,23 +288,20 @@ export default function CVEditor() {
           </button>
         </div>
 
-        <div className="flex-grow overflow-hidden">
+        {/* Monaco Editor */}
+        <div className="flex-grow">
           <Editor
             height="100%"
             defaultLanguage="latex"
             theme="vs-dark"
             value={code}
+            onMount={handleEditorDidMount} // Essential for the snippet logic
             onChange={(value) => setCode(value || '')}
-            options={{ 
-              minimap: { enabled: false }, 
-              fontSize: 13,
-              lineNumbers: 'on',
-              scrollBeyondLastLine: false,
-              automaticLayout: true
-            }}
+            options={{ minimap: { enabled: false }, fontSize: 13, wordWrap: 'on' }}
           />
         </div>
 
+        {/* Terminal/Console */}
         {showConsole && (
           <div className="h-1/3 bg-[#0a0a0a] border-t border-gray-700 flex flex-col shrink-0">
             <div className="px-4 py-1.5 bg-gray-800 text-[10px] uppercase font-bold text-gray-400 flex justify-between items-center">
