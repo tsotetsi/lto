@@ -4,6 +4,11 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
 
+const STORAGE_KEYS = {
+  CODE: 'cv_editor_code',
+  FONT: 'cv_editor_font'
+};
+
 const AVAILABLE_FONTS = [
   "Liberation Sans",
   "Liberation Serif",
@@ -13,17 +18,32 @@ const AVAILABLE_FONTS = [
 
 export default function CVEditor() {
   
-  const [code, setCode] = useState<string>('\\documentclass{article}\n\\begin{document}\n\\section{Experience}\nSoftware Engineer at Google...\n\\end{document}');
+  // Initialize with empty or default values.
+  const [code, setCode] = useState<string>('\\documentclass{article}\n\\begin{document}\n\\section{Experience}\nSoftware Engineer at Google\n\\end{document}');
   const [selectedFont, setSelectedFont] = useState(AVAILABLE_FONTS[0]);
+  const [isInitialized, setIsInitialized] = useState(false);
+
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCompiling, setIsCompiling] = useState(false);
   const [showConsole, setShowConsole] = useState(false);
 
-  // Refs to track state without triggering re-renders or dependency loops
+  // Refs to track state without triggering re-renders or dependency loops.
   const lastCompiledCodeRef = useRef<string>('');
   const lastCompiledFontRef = useRef<string>(AVAILABLE_FONTS[0]); // Initialize with your default font
   const currentUrlRef = useRef<string | null>(null);
+
+  // Try loading from localStorage on mount
+  useEffect(() => {
+    const savedCode = localStorage.getItem(STORAGE_KEYS.CODE);
+    const savedFont = localStorage.getItem(STORAGE_KEYS.FONT);
+
+    if (savedCode) setCode(savedCode);
+    else setCode('% Welcome! Start your CV here...\n\\documentclass{article}\n\\begin{document}\nHello World\n\\end{document}');
+
+    if (savedFont && AVAILABLE_FONTS.includes(savedFont)) setSelectedFont(savedFont);
+    setIsInitialized(true);
+  }, []);
 
   const compileLatex = useCallback(async (texContent: string, fontName: string) => {
     // 1. Don't compile if the content hasn't changed
