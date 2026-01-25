@@ -1,10 +1,11 @@
-# Extension fields for reuse
+# Extension fields for reusability.
 x-common-environment: &common-env
   LOG_LEVEL: info
   API_URL: http://backend:8000
 
 services:
   backend:
+    image: lto-backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -28,6 +29,7 @@ services:
       retries: 3
 
   frontend:
+    image: lto-frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -37,7 +39,7 @@ services:
       - "3000:3000"
     environment:
       <<: *common-env
-      NEXT_PUBLIC_API_URL: http://localhost:8000 # Browser-side URL
+      BACKEND_PUBLIC_API_URL: http://localhost:8000 # API-side URL.
       NODE_ENV: development
     volumes:
       # Hot reload in development.
