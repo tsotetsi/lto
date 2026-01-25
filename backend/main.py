@@ -34,12 +34,31 @@ def cleanup_files(temp_path: Path):
     if temp_path.exists():
         shutil.rmtree(temp_path)
 
+def validate_latex_file(content): 
+    """Basic LaTeX validation"""
+    checks = [
+        ("\\documentclass" in content, "Missing \\documentclass"),
+        ("\\begin{document}" in content, "Missing \\begin{document}"),
+        ("\\end{document}" in content, "Missing \\end{document}"),
+    ] 
+
+    issues = [msg for check, msg in checks if not check] 
+    return issues
+
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
 
 @app.post("/compile")
 async def compile_latex(request: ResumeRequest, background_tasks: BackgroundTasks):
+    # 0. Validate the LaTeX content
+    validation_issues = validate_latex_file(request.tex_content)
+    if validation_issues:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid LaTeX document: {', '.join(validation_issues)}"
+        )
+
     # 1. Create a unique workspace for this request
     job_id = str(uuid.uuid4())
     job_dir = TEMP_DIR / job_id
