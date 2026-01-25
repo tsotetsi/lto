@@ -3,6 +3,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
+import { env } from 'node:process';
+
+console.log(env)
 
 const STORAGE_KEYS = {
   CODE: 'cv_editor_code',
@@ -46,14 +49,14 @@ Tools & Docker, Git, Next.js, FastAPI \\\\
 export default function CVEditor() {
   
   // Initialize with empty or default values.
-  const [code, setCode] = useState<string>('\\documentclass{article}\n\\begin{document}\n\\section{Experience}\nSoftware Engineer at Google\n\\end{document}');
+  const [code, setCode] = useState<string>('');
   const [selectedFont, setSelectedFont] = useState(AVAILABLE_FONTS[0]);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCompiling, setIsCompiling] = useState(false);
-  const [showConsole, setShowConsole] = useState(false);
+  const [showConsole, setShowConsole] = useState(true);
 
   // Monaco Editor instance Ref.
   const editorRef = useRef<any>(null);
@@ -124,98 +127,101 @@ export default function CVEditor() {
     localStorage.setItem(STORAGE_KEYS.FONT, selectedFont);
   }, [code, selectedFont, isInitialized]);
 
-  const compileLatex = useCallback(async (texContent: string, fontName: string) => {
-    // Don't compile if the content hasn't changed
-    if (texContent === lastCompiledCodeRef.current && fontName === lastCompiledFontRef.current) {
-      return;
-    }
-    // Show error if content is empty.
-    if (!texContent.trim()) {
-      setError('Empty document. Please add some content.');
-      setShowConsole(true);
-      setIsCompiling(false);
-      return;
-    }
+  // Debounced compilation logic
+  useEffect(() => {
+    if (!isInitialized) return;
 
-    setIsCompiling(true);
+    const compile = async () => {
+      let contentToCompile = code.trim();
+      let isPlaceholder = false;
 
-    try {
-      const response = await axios.post(
-        'http://localhost:8000/compile',
-        {
-          tex_content: texContent,
-          file_name: 'my_cv',
-          font: fontName,
-        },
-        { responseType: 'blob' }
-      );
-
-      const responseBlob = response.data;
-
-      if (responseBlob.type === 'application/pdf') {
-        if (currentUrlRef.current) {
-          URL.revokeObjectURL(currentUrlRef.current);
-        }
-
-        const url = URL.createObjectURL(responseBlob);
-        currentUrlRef.current = url;
-        setPdfUrl(url);
-        setError(null);
-        lastCompiledCodeRef.current = texContent;
-        lastCompiledFontRef.current = fontName;
-      } else {
-        const errorText = await responseBlob.text();
-        let errorMessage = 'Compilation failed: Could not parse error log.';
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.detail || 'Compilation failed.';
-        } catch (e) {
-          if (errorText) {
-            errorMessage = errorText;
-          }
-        }
-        setError(errorMessage);
-        setShowConsole(true);
+      if (!contentToCompile) {
+        isPlaceholder = true;
+        contentToCompile = `\\documentclass{article}
+\\usepackage[a4paper, margin=2cm]{geometry}
+\\begin{document}
+\\sffamily
+\\Huge\\bfseries
+\\begin{center}
+  Document Blank
+\\end{center}
+\\end{document}`;
+      } else if (code === lastCompiledCodeRef.current && selectedFont === lastCompiledFontRef.current) {
+        return;
       }
-    } catch (err: any) {
-      let errorMessage = 'An unknown compilation error occurred.';
-      if (err.response?.data) {
-        if (err.response.data instanceof Blob) {
-          const text = await err.response.data.text();
-          try {
-            const errorData = JSON.parse(text);
-            errorMessage = errorData.detail || 'Could not find details in error log.';
-          } catch {
-            errorMessage = text || 'Failed to read error log blob.';
+
+      setIsCompiling(true);
+
+      try {
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/compile`,
+          {
+            tex_content: contentToCompile,
+            file_name: 'my_cv',
+            font: selectedFont,
+          },
+          { responseType: 'blob' }
+        );
+
+        const responseBlob = response.data;
+
+        if (responseBlob.type === 'application/pdf') {
+          if (currentUrlRef.current) {
+            URL.revokeObjectURL(currentUrlRef.current);
           }
-        } else if (err.response.data.detail) {
-          errorMessage = err.response.data.detail;
+
+          const url = URL.createObjectURL(responseBlob);
+          currentUrlRef.current = url;
+          setPdfUrl(url);
+          setError(null);
+          setShowConsole(true);
+
+          if (!isPlaceholder) {
+            lastCompiledCodeRef.current = code;
+            lastCompiledFontRef.current = selectedFont;
+          }
         } else {
-          errorMessage = err.message || 'Connection to compiler lost.';
+          const errorText = await responseBlob.text();
+          let errorMessage = 'Compilation failed: Could not parse error log.';
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.detail || 'Compilation failed.';
+          } catch (e) {
+            if (errorText) errorMessage = errorText;
+          }
+          setError(errorMessage);
+
         }
-      } else {
-        errorMessage = err.message || 'A network error occurred.';
+      } catch (err: any) {
+        let errorMessage = 'An unknown compilation error occurred.';
+        if (err.response?.data) {
+          if (err.response.data instanceof Blob) {
+            const text = await err.response.data.text();
+            try {
+              const errorData = JSON.parse(text);
+              errorMessage = errorData.detail || 'Could not find details in error log.';
+            } catch {
+              errorMessage = text || 'Failed to read error log blob.';
+            }
+          } else if (err.response.data.detail) {
+            errorMessage = err.response.data.detail;
+          } else {
+            errorMessage = err.message || 'Connection to compiler lost.';
+          }
+        } else {
+          errorMessage = err.message || 'A network error occurred.';
+        }
+                setError(errorMessage);
+        setShowConsole(true);
+
+      } finally {
+        setIsCompiling(false);
       }
-      setError(errorMessage);
-      setShowConsole(true);
-    } finally {
-      setIsCompiling(false);
-    }
-  }, []);
+    };
 
-  // Debounce logic
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      compileLatex(code, selectedFont);
-    }, 1000);
+    const timeout = setTimeout(compile, 1000);
     return () => clearTimeout(timeout);
-  }, [code, selectedFont, compileLatex]);
-
-  useEffect(() => {
-      if (!isInitialized) return;
-      const timeout = setTimeout(() => compileLatex(code, selectedFont), 1000);
-      return () => clearTimeout(timeout);
-    }, [code, selectedFont, compileLatex, isInitialized]);
+  }, [code, selectedFont, isInitialized]);
 
     // Don't render editor until we've loaded from localStorage to avoid flicker
     if (!isInitialized) {
@@ -278,8 +284,14 @@ export default function CVEditor() {
                 </div>
             )}
           </div>
-          <button 
-            onClick={() => setShowConsole(!showConsole)}
+          <button
+            onClick={() => {
+              if (error) {
+                setShowConsole(true); // Keep console open if there's an error
+              } else {
+                setShowConsole(prev => !prev); // Otherwise, toggle
+              }
+            }}
             className={`text-[10px] uppercase font-bold px-3 py-1 rounded transition-colors ${
               error ? 'bg-red-600 text-white' : 'bg-gray-700 hover:bg-gray-600'
             }`}
@@ -302,8 +314,7 @@ export default function CVEditor() {
         </div>
 
         {/* Terminal/Console */}
-        {showConsole && (
-          <div className="h-1/3 bg-[#0a0a0a] border-t border-gray-700 flex flex-col shrink-0">
+        <div className={`h-1/3 bg-[#0a0a0a] border-t border-gray-700 flex-col shrink-0 ${showConsole ? 'flex' : 'hidden'}`}>
             <div className="px-4 py-1.5 bg-gray-800 text-[10px] uppercase font-bold text-gray-400 flex justify-between items-center">
               <span>Compiler Logs</span>
               <button onClick={() => setShowConsole(false)} className="hover:text-white">Close</button>
@@ -315,7 +326,6 @@ export default function CVEditor() {
               {error || 'Build Successful. No errors reported.'}
             </pre>
           </div>
-        )}
       </div>
 
       {/* Right Column */}
