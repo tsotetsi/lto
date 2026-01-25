@@ -1,10 +1,10 @@
 .PHONY: help install backend-up backend-down postgres-up postgres-down redis-up redis-down loki-up loki-down grafana-up grafana-down promtail-up promtail-down clean
 
-# Variables
+# Variables.
 PIP3 := pip3
 PYTEST := pytest3
 
-# Colors
+# Colors.
 GREEN := \033[0;32m
 RED := \033[0;31m
 YELLOW := \033[1;33m
@@ -28,6 +28,8 @@ help:
 	@echo "  grafana-down      - Stop Grafana stack"
 	@echo "  promtail-up       - Start Promtail stack"
 	@echo "  promtail-down     - Stop Promtail stack"
+	@echo "  build-up          - Build and run backend and frontend"
+	@echo "  logs              - Show logs of a service"
 	@echo "  clean             - Clean temporary files"
 	@echo ""
 
@@ -44,65 +46,83 @@ unit:
 
 backend-up:
 	@echo "$(YELLOW)ℹ️  Starting backend...$(NC)"
-	docker-compose -f docker-compose.yml up -d
+	docker compose up -d
 	@echo "$(GREEN)✅  Backend started..$(NC)"
-
 backend-down:
 	@echo "$(YELLOW)ℹ️  Stopping backend...$(NC)"
-	docker-compose -f docker-compose.yml down
+	docker compose down
 	@echo "$(GREEN)✅  Backend stopped..$(NC)"
 
 postgres-up:
 	@echo "$(YELLOW)ℹ️  Starting Postgres...$(NC)"
-	docker-compose -f docker-compose.yml up -d postgres
+	docker-compose up -d postgres
 	@echo "$(GREEN)✅  Postgres started..$(NC)"
 
 postgres-down:
 	@echo "$(YELLOW)ℹ️  Stopping Postgres...$(NC)"
-	docker-compose -f docker-compose.yml down postgres
+	docker compose down postgres 
 	@echo "$(GREEN)✅  Postgres stopped..$(NC)"
 
 redis-up:
 	@echo "$(YELLOW)ℹ️  Starting Redis...$(NC)"
-	docker-compose -f docker-compose.yml up -d redis
+	docker compose up -d redis
 	@echo "$(GREEN)✅  Redis started..$(NC)"
 
 redis-down:
 	@echo "$(YELLOW)ℹ️  Stopping Redis...$(NC)"
-	docker-compose -f docker-compose.yml down redis
+	docker compose down redis
 	@echo "$(GREEN)✅  Redis stopped..$(NC)"
 
 loki-up:
 	@echo "$(YELLOW)ℹ️  Starting Loki...$(NC)"
-	docker-compose -f docker-compose.yml up -d loki
+	docker compose up -d loki
 	@echo "$(GREEN)✅  Loki started..$(NC)"
 
 loki-down:
 	@echo "$(YELLOW)ℹ️  Stopping Loki...$(NC)"
-	docker-compose -f docker-compose.yml down loki
+	docker compose down loki
 	@echo "$(GREEN)✅  Loki stopped..$(NC)"
 
 grafana-up:
 	@echo "$(YELLOW)ℹ️  Starting Grafana...$(NC)"
-	docker-compose -f docker-compose.yml up -d grafana
+	docker compose up -d grafana
 	@echo "$(GREEN)✅  Grafana started..$(NC)"
 
 grafana-down:
 	@echo "$(YELLOW)ℹ️  Stopping Grafana...$(NC)"
-	docker-compose -f docker-compose.yml down grafana
+	docker compose down grafana
 	@echo "$(GREEN)✅  Grafana stopped..$(NC)"
 
 promtail-up:
 	@echo "$(YELLOW)ℹ️  Starting Promtail...$(NC)"
-	docker-compose -f docker-compose.yml up -d promtail
+	docker compose up -d promtail
 	@echo "$(GREEN)✅  Promtail started..$(NC)"
 
 promtail-down:
 	@echo "$(YELLOW)ℹ️  Stopping Promtail...$(NC)"
-	docker-compose -f docker-compose.yml down promtail
+	docker compose down promtail
 	@echo "$(GREEN)✅  Promtail stopped..$(NC)"
+
+build-up:
+	@echo "$(YELLOW)ℹ️  Building backend...$(NC)"
+	docker compose up -d --build backend frontend
+	@echo "$(GREEN)✅  Backend built and running..$(NC)"
+	@echo "$(GREEN)✅  Frontend built and running..$(NC)"
+
+build-down:
+	@echo "$(YELLOW)ℹ️  Stopping backend and frontend...$(NC)"
+	docker compose down backend frontend
+	@echo "$(GREEN)✅  Backend and frontend stopped..$(NC)"
+
+# Show logs of a service.
+logs:
+	@if [ -z "$(service)"];then echo "$(RED)❌ Please specify a service name!$(NC). Usage: make logs service=backend"; exit 1; fi
+	@echo "$(YELLOW)📜 Showing logs for service $(service)...$(NC)"
+	docker compose logs -f $(service)
+	@echo "$(GREEN)✅ Logs for service $(service) displayed!$(NC)"
 
 clean:
 	@echo "$(YELLOW)ℹ️  Cleaning temporary files...$(NC)"
-	docker-compose -f docker-compose.yml down --volumes --remove-orphans
+	docker compose down -v --remove-orphans
 	@echo "$(GREEN)✅  Temporary files cleaned..$(NC)"
+
