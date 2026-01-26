@@ -121,10 +121,10 @@ async def compile_latex(request: ResumeRequest, background_tasks: BackgroundTask
         # Schedule cleanup and return a message
         background_tasks.add_task(cleanup_files, job_dir)
         return {"message": "Document blank: No content to compile"}
-    
+
     # 5. Schedule cleanup and return the file
     background_tasks.add_task(cleanup_files, job_dir)
-    
+
     return FileResponse(
         path=pdf_file_path,
         media_type='application/pdf',
