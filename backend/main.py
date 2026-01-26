@@ -116,7 +116,13 @@ async def compile_latex(request: ResumeRequest, background_tasks: BackgroundTask
         cleanup_files(job_dir)
         raise HTTPException(status_code=408, detail="Compilation timed out")
 
-    # 4. Schedule cleanup and return the file
+    # 4. Check if PDF was generated
+    if not pdf_file_path.exists():
+        # Schedule cleanup and return a message
+        background_tasks.add_task(cleanup_files, job_dir)
+        return {"message": "Document blank: No content to compile"}
+    
+    # 5. Schedule cleanup and return the file
     background_tasks.add_task(cleanup_files, job_dir)
     
     return FileResponse(
