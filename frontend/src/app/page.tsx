@@ -55,6 +55,7 @@ export default function CVEditor() {
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [isCompiling, setIsCompiling] = useState(false);
   const [showConsole, setShowConsole] = useState(true);
 
@@ -174,11 +175,23 @@ export default function CVEditor() {
           currentUrlRef.current = url;
           setPdfUrl(url);
           setError(null);
+          setInfoMessage(null);
           setShowConsole(true);
 
           if (!isPlaceholder) {
             lastCompiledCodeRef.current = code;
             lastCompiledFontRef.current = selectedFont;
+          }
+        } else if (responseBlob.type === 'application/json') {
+          const jsonText = await responseBlob.text();
+          try {
+            const jsonData = JSON.parse(jsonText);
+            setInfoMessage(jsonData.message || 'Document blank');
+            setError(null);
+            setPdfUrl(null);
+            setShowConsole(true);
+          } catch (e) {
+            setError('Failed to parse server response');
           }
         } else {
           const errorText = await responseBlob.text();
@@ -190,7 +203,6 @@ export default function CVEditor() {
             if (errorText) errorMessage = errorText;
           }
           setError(errorMessage);
-
         }
       } catch (err: any) {
         let errorMessage = 'An unknown compilation error occurred.';
@@ -321,9 +333,9 @@ export default function CVEditor() {
             </div>
             <pre
               className="p-4 overflow-y-auto font-mono text-[11px] whitespace-pre-wrap leading-relaxed"
-              style={{ color: error ? '#f87171' : '#4ade80' }}
+              style={{ color: error ? '#f87171' : infoMessage ? '#4ade80' : '#4ade80' }}
             >
-              {error || 'Build Successful. No errors reported.'}
+              {infoMessage || error || 'Build Successful. No errors reported.'}
             </pre>
           </div>
       </div>
