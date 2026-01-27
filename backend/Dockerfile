@@ -7,11 +7,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Create virtual environment.
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy and install requirements.
 COPY requirements ./requirements/
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements/base.txt
@@ -30,12 +28,16 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install system dependencies + MS Fonts EULA automation.
+RUN apt-get update && \
+    # Make them available in the drop down as well.
+    echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections && \
+    apt-get install -y --no-install-recommends \
     texlive-xetex \
     texlive-fonts-recommended \
     fontconfig \
     fonts-liberation \
+    ttf-mscorefonts-installer \
     curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -43,18 +45,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=python-builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Setup custom fonts.
+# Setup custom fonts. 
+# We copy them as root first to ensure fc-cache can register them system-wide
 RUN mkdir -p /usr/share/fonts/truetype/custom
-COPY --chown=appuser:appuser ./fonts /usr/share/fonts/truetype/custom
+COPY ./fonts /usr/share/fonts/truetype/custom/
+
+# Refresh font cache so XeLaTeX can see 'Times New Roman' and your 'Fontin'
 RUN fc-cache -f -v
 
-# Verify fonts are installed.
-RUN fc-list | grep -i "Liberation" && fc-list | grep -i "Fontin"
+# Verify fonts are installed (This will print to build logs)
+RUN fc-list | grep -i "Times New Roman" && fc-list | grep -i "Fontin"
 
 # Copy source code and set permissions.
 COPY --chown=appuser:appuser . .
 
-# Switch to non-root user.
 USER appuser
 
 EXPOSE 8000
