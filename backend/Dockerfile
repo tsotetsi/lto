@@ -37,6 +37,8 @@ RUN echo "deb http://deb.debian.org/debian bookworm main contrib non-free" > /et
     echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     texlive-xetex \
+    texlive-lang-italian \
+    texlive-lang-greek \
     texlive-fonts-recommended \
     fontconfig \
     fonts-liberation \
