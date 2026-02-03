@@ -94,12 +94,16 @@ async def compile_latex(request: ResumeRequest, background_tasks: BackgroundTask
     # 3. Run XeLaTeX
     # Note: We run it twice for references/page numbers if necessary
     try:
+        import logging
+        logging.basicConfig(level=logging.INFO)
+        logger = logging.getLogger(__name__)
+        logger.info(f"Starting XeLaTeX compilation for font: {request.font}")
         process = subprocess.run(
             ["xelatex", "-interaction=nonstopmode", f"{request.file_name}.tex"],
             cwd=job_dir,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            timeout=30  # Safety timeout
+            timeout=60  # Increased timeout to 60 seconds
         )
 
         if process.returncode != 0:
@@ -113,6 +117,7 @@ async def compile_latex(request: ResumeRequest, background_tasks: BackgroundTask
             raise HTTPException(status_code=400, detail=f"LaTeX Error: {log_content}")
 
     except subprocess.TimeoutExpired:
+        logger.error("XeLaTeX compilation timed out after 60 seconds")
         cleanup_files(job_dir)
         raise HTTPException(status_code=408, detail="Compilation timed out")
 
