@@ -59,7 +59,7 @@ storage-postgres-up:
 	@echo "$(GREEN)✅  Postgres started..$(NC)"
 storage-postgres-down:
 	@echo "$(YELLOW)ℹ️  Stopping Postgres...$(NC)"
-	docker compose down storage-postgres 
+	docker compose down storage-postgres
 	@echo "$(GREEN)✅  Postgres stopped..$(NC)"
 
 redis-up:
