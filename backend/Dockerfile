@@ -1,5 +1,5 @@
 # Stage 1: Build Python dependencies.
-FROM python:3.12-slim AS python-builder
+FROM python:3.14-slim AS python-builder
 
 ARG ENVIRONMENT=development
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -21,7 +21,7 @@ RUN if [ "$ENVIRONMENT" = "development" ]; then \
     fi
 
 # Stage 2: Final Production Image.
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 # Create non-root user.
 RUN groupadd -r appuser && useradd -r -g appuser appuser
@@ -65,6 +65,9 @@ RUN fc-list | grep -i "Times New Roman" && fc-list | grep -i "Fontin"
 COPY --chown=appuser:appuser . .
 
 USER appuser
+
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
 
 EXPOSE 8000
 

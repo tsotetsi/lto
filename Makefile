@@ -1,4 +1,4 @@
-.PHONY: help install backend-up backend-down postgres-up postgres-down redis-up redis-down loki-up loki-down grafana-up grafana-down promtail-up promtail-down clean
+.PHONY: help install backend-up backend-down storage-postgres-up storage-postgres-down redis-up redis-down loki-up loki-down grafana-up grafana-down promtail-up promtail-down clean
 
 # Variables.
 PIP3 := pip3
@@ -18,8 +18,8 @@ help:
 	@echo "  unit              - Run unit tests with coverage"
 	@echo "  backend-up        - Start backend"
 	@echo "  backend-down      - Stop backend"
-	@echo "  postgres-up       - Start Postgres stack"
-	@echo "  postgres-down     - Stop Postgres stack"
+	@echo "  storage-postgres-up       - Start Postgres stack"
+	@echo "  storage-postgres-down     - Stop Postgres stack"
 	@echo "  redis-up          - Start Redis stack"
 	@echo "  redis-down        - Stop Redis stack"
 	@echo "  loki-up           - Start Loki stack"
@@ -53,14 +53,13 @@ backend-down:
 	docker compose down
 	@echo "$(GREEN)✅  Backend stopped..$(NC)"
 
-postgres-up:
+storage-postgres-up:
 	@echo "$(YELLOW)ℹ️  Starting Postgres...$(NC)"
-	docker-compose up -d postgres
+	docker compose up -d storage-postgres
 	@echo "$(GREEN)✅  Postgres started..$(NC)"
-
-postgres-down:
+storage-postgres-down:
 	@echo "$(YELLOW)ℹ️  Stopping Postgres...$(NC)"
-	docker compose down postgres 
+	docker compose down storage-postgres
 	@echo "$(GREEN)✅  Postgres stopped..$(NC)"
 
 redis-up:
@@ -126,3 +125,7 @@ clean:
 	docker compose down -v --remove-orphans
 	@echo "$(GREEN)✅  Temporary files cleaned..$(NC)"
 
+openssl:
+	@echo "$(YELLOW)ℹ️  Creating openssl password...$(NC)"
+	@openssl rand -base64 32 | tr -d '=+/ ' | cut -c1-20
+	@echo "$(GREEN)✅  Openssl password created above..$(NC)"

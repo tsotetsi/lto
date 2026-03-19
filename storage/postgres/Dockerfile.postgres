@@ -1,0 +1,17 @@
+FROM postgis/postgis:16-3.5
+
+LABEL org.opencontainers.image.source="https://lto.github.io/lto" \
+      org.opencontainers.image.description="Production Grade LTO PostgreSQL 16 Container" \
+      maintainer="tsotetsi@lto.online"
+
+COPY --chown=postgres:postgres initdb/01_init_postgres_db.sh /docker-entrypoint-initdb.d/init.sh
+
+RUN chmod +x /docker-entrypoint-initdb.d/init.sh
+
+USER root
+RUN mkdir -p /var/run/postgresql && \
+    chown postgres:postgres /var/run/postgresql && \
+    chmod 0755 /var/run/postgresql && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+USER postgres
