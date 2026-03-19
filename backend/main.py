@@ -1,15 +1,56 @@
+from datetime import datetime, timezone
+from pathlib import Path
+
 import uuid
 import subprocess
 import shutil
-from pathlib import Path
+import structlog
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
 
 
-app = FastAPI()
+from utils.logging import setup_logging
+
+setup_logging()
+
+logger = structlog.get_logger("lto-api")
+
+tags_metadata = [  # For API documentation.
+    {
+        "name": "LTO Resume API",
+        "description": "A platform for compiling LTO resumes using LaTeX.",
+    }
+]
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Starting up...")
+    yield
+    logger.info("Shutting down...")
+
+app = FastAPI(
+    title="LTO Resume API.",
+    description="LTO Resume API.",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    date=datetime.now(timezone.utc),
+    openapi_tags=tags_metadata,
+    contact={
+        "name": "Thapelo Tsotetsi",
+        "email": "thapelotsotetsi2030@gmail.com",
+        "url": "https://tsotetsi.github.io",
+    },
+    license_info={
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0",
+    },
+    lifespan=lifespan,
+)
 
 # CORS middleware
 app.add_middleware(
@@ -19,6 +60,25 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
+
+# Request logging middleware.
+@app.middleware("http")
+async def request_logging_middleware(request: Request, call_next):
+    request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+
+    structlog.contextvars.bind_contextvars(
+        request_id=request_id,
+        method=request.method,
+        path=request.url.path,
+    )
+
+    response = await call_next(request)
+
+    response.headers["X-Request-ID"] = request_id
+    structlog.contextvars.clear_contextvars()
+
+    return response
+
 
 # Temporary directory for compilation
 TEMP_DIR = Path("/tmp/cv_builds")
