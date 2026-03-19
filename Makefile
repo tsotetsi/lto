@@ -126,3 +126,8 @@ clean:
 	docker compose down -v --remove-orphans
 	@echo "$(GREEN)✅  Temporary files cleaned..$(NC)"
 
+openssl:
+	@echo "$(YELLOW)ℹ️  Creating openssl password...$(NC)"
+	@openssl rand -base64 32 | tr -d '=+/ ' | cut -c1-20
+	@echo "$(GREEN)✅  Openssl password created above..$(NC)"
+
