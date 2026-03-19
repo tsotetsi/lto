@@ -1,0 +1,29 @@
+// 1. Discover Docker containers
+discovery.docker "lto_containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+// 2. Filter and Relabel (so we get clean 'container_name' labels)
+discovery.relabel "docker_logs" {
+  targets = discovery.docker.lto_containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+}
+
+// 3. Read the logs from the discovered containers
+loki.source.docker "lto_docker_source" {
+  host    = "unix:///var/run/docker.sock"
+  targets = discovery.relabel.docker_logs.output
+  forward_to = [loki.write.local_loki.receiver]
+}
+
+// 4. Send everything to Loki
+loki.write "local_loki" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
