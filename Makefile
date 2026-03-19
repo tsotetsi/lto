@@ -1,4 +1,4 @@
-.PHONY: help install backend-up backend-down storage-postgres-up storage-postgres-down redis-up redis-down loki-up loki-down grafana-up grafana-down promtail-up promtail-down clean
+.PHONY: help install backend-up backend-down storage-postgres-up storage-postgres-down redis-up redis-down loki-up loki-down grafana-up grafana-down clean
 
 # Variables.
 PIP3 := pip3
@@ -26,8 +26,6 @@ help:
 	@echo "  loki-down         - Stop Loki stack"
 	@echo "  grafana-up        - Start Grafana stack"
 	@echo "  grafana-down      - Stop Grafana stack"
-	@echo "  promtail-up       - Start Promtail stack"
-	@echo "  promtail-down     - Stop Promtail stack"
 	@echo "  build-up          - Build and run backend and frontend"
 	@echo "  logs              - Show logs of a service"
 	@echo "  clean             - Clean temporary files"
@@ -92,16 +90,6 @@ grafana-down:
 	docker compose down grafana
 	@echo "$(GREEN)✅  Grafana stopped..$(NC)"
 
-promtail-up:
-	@echo "$(YELLOW)ℹ️  Starting Promtail...$(NC)"
-	docker compose up -d promtail
-	@echo "$(GREEN)✅  Promtail started..$(NC)"
-
-promtail-down:
-	@echo "$(YELLOW)ℹ️  Stopping Promtail...$(NC)"
-	docker compose down promtail
-	@echo "$(GREEN)✅  Promtail stopped..$(NC)"
-
 build-up:
 	@echo "$(YELLOW)ℹ️  Building backend...$(NC)"
 	docker compose up -d --build backend frontend
@@ -112,6 +100,16 @@ build-down:
 	@echo "$(YELLOW)ℹ️  Stopping backend and frontend...$(NC)"
 	docker compose down backend frontend
 	@echo "$(GREEN)✅  Backend and frontend stopped..$(NC)"
+
+make monitoring-up:
+	@echo "$(YELLOW)ℹ️  Starting monitoring...$(NC)"
+	docker compose up -d loki grafana alloy
+	@echo "$(GREEN)✅  Monitoring started..$(NC)"
+
+make monitoring-down:
+	@echo "$(YELLOW)ℹ️  Stopping monitoring...$(NC)"
+	docker compose down loki grafana alloy
+	@echo "$(GREEN)✅  Monitoring stopped..$(NC)"
 
 # Show logs of a service.
 logs:
