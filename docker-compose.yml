@@ -1,7 +1,16 @@
-# Extension fields for reusability.
-x-common-environment: &common-env
-  LOG_LEVEL: info
-  API_URL: http://backend:8000
+secrets:
+  postgres_user:
+    file: .secrets/postgres_user.txt
+  postgres_password:
+    file: .secrets/postgres_password.txt
+  healthcheck_user:
+    file: .secrets/healthcheck_user.txt
+  healthcheck_password:
+    file: .secrets/healthcheck_password.txt
+  lto_app_user:
+    file: .secrets/lto_app_user.txt
+  lto_app_password:
+    file: .secrets/lto_app_password.txt
 
 services:
   backend:
@@ -11,15 +20,20 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      <<: *common-env
+      LOG_LEVEL: info
       ENVIRONMENT: development
+      API_URL: http://backend:8000
+      POSTGRES_HOST: storage-postgres
+      POSTGRES_USER_FILE: /run/secrets/lto_app_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/lto_app_password
     ports:
       - "8000:8000"
     volumes:
       # Hot reload in development.
       - ./backend:/app
     secrets:
-      - db_password
+      - lto_app_user
+      - lto_app_password
     networks:
       - lto_network
     healthcheck:
@@ -27,6 +41,37 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  storage-postgres:
+    image: lto-storage-postgres:latest
+    build:
+      context: ./storage/postgres
+      dockerfile: Dockerfile.postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: lto
+      POSTGRES_USER_FILE: /run/secrets/postgres_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_user
+      - postgres_password
+      - healthcheck_user
+      - healthcheck_password
+      - lto_app_user
+      - lto_app_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./storage/postgres/initdb:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - lto_network
+    healthcheck:
+      test: ["CMD-SHELL", "PGUSER=$(cat /run/secrets/healthcheck_user) PGPASSWORD=$(cat /run/secrets/healthcheck_password) pg_isready -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
 
   frontend:
     image: lto-frontend:latest
@@ -38,7 +83,6 @@ services:
     ports:
       - "3000:3000"
     environment:
-      <<: *common-env
       BACKEND_PUBLIC_API_URL: http://localhost:8000 # API-side URL.
       NODE_ENV: development
     volumes:
@@ -56,6 +100,5 @@ networks:
     driver: bridge
     name: lto_network
 
-secrets:
-  db_password:
-    file: .secrets/db_password.txt
+volumes:
+  postgres_data: {}
