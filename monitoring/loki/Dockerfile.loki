@@ -1,0 +1,25 @@
+FROM debian:bookworm-slim
+
+# Install Loki as a binary (not via apt)
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends wget ca-certificates unzip \
+  && rm -rf /var/lib/apt/lists/*
+
+# Download Loki binary (adjust version/tag as needed)
+ENV LOKI_VERSION=3.6.0
+RUN wget -O /usr/local/bin/loki.zip \
+  "https://github.com/grafana/loki/releases/download/v${LOKI_VERSION}/loki-linux-amd64.zip" \
+  && unzip /usr/local/bin/loki.zip -d /usr/local/bin/ \
+  && mv /usr/local/bin/loki-linux-amd64 /usr/local/bin/loki \
+  && rm /usr/local/bin/loki.zip \
+  && chmod +x /usr/local/bin/loki
+
+COPY loki-config.yaml /etc/loki/loki-config.yaml
+
+EXPOSE 3100
+
+HEALTHCHECK --interval=10s --timeout=2s --start-period=30s --retries=12 \
+  CMD wget -qO- http://127.0.0.1:3100/ready | grep -q ready || exit 1
+
+ENTRYPOINT ["/usr/local/bin/loki"]
+CMD ["-config.file", "/etc/loki/loki-config.yaml"]
