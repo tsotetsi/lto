@@ -1,7 +1,11 @@
+ARG PYTHON_VERSION=3.12
+
 # Stage 1: Build Python dependencies.
-FROM python:3.14-slim AS python-builder
+FROM python:${PYTHON_VERSION}-slim AS python-builder
 
 ARG ENVIRONMENT=development
+ARG PYTHON_VERSION
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
@@ -12,16 +16,14 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 COPY requirements ./requirements/
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements/base.txt
-
-RUN if [ "$ENVIRONMENT" = "development" ]; then \
-      pip install --no-cache-dir -r requirements/development.txt; \
-    else \
-      pip install --no-cache-dir -r requirements/production.txt; \
-    fi
+    pip install --no-cache-dir \
+    --require-hashes \
+    --no-deps \
+    -r requirements/base.txt \
+    -r requirements/${ENVIRONMENT}.txt
 
 # Stage 2: Final Production Image.
-FROM python:3.14-slim
+FROM python:${PYTHON_VERSION}-slim
 
 # Create non-root user.
 RUN groupadd -r appuser && useradd -r -g appuser appuser
