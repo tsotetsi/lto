@@ -161,7 +161,7 @@ export default function CVEditor() {
 
       try {
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/compile`,
+          `${process.env.NEXT_PUBLIC_API_URL}/compile/raw`,
           {
             tex_content: contentToCompile,
             file_name: 'my_cv',

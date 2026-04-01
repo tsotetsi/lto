@@ -1,19 +1,18 @@
 from datetime import datetime, timezone
 from pathlib import Path
-
 import uuid
 import subprocess
 import shutil
 import structlog
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Request, status
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 
-
 from utils.logging import setup_logging
+
 
 setup_logging()
 
@@ -35,7 +34,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="LTO Resume API.",
     description="LTO Resume API.",
-    version="1.0.0",
+    version="0.0.1",
     docs_url="/docs",
     redoc_url="/redoc",
     date=datetime.now(timezone.utc),
@@ -109,13 +108,12 @@ def validate_latex_file(content):
 def health_check():
     return {"status": "healthy"}
 
-@app.post("/compile")
 async def compile_latex(request: ResumeRequest, background_tasks: BackgroundTasks):
     # 0. Validate the LaTeX content
     validation_issues = validate_latex_file(request.tex_content)
     if validation_issues:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid LaTeX document: {', '.join(validation_issues)}"
         )
 
@@ -154,9 +152,6 @@ async def compile_latex(request: ResumeRequest, background_tasks: BackgroundTask
     # 3. Run XeLaTeX
     # Note: We run it twice for references/page numbers if necessary
     try:
-        import logging
-        logging.basicConfig(level=logging.INFO)
-        logger = logging.getLogger(__name__)
         logger.info(f"Starting XeLaTeX compilation for font: {request.font}")
         process = subprocess.run(
             ["xelatex", "-interaction=nonstopmode", f"{request.file_name}.tex"],
@@ -174,7 +169,7 @@ async def compile_latex(request: ResumeRequest, background_tasks: BackgroundTask
                 log_content = log_path.read_text(errors='ignore')[-1000:] # Last 1000 chars
 
             cleanup_files(job_dir)
-            raise HTTPException(status_code=400, detail=f"LaTeX Error: {log_content}")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"LaTeX Error: {log_content}")
 
     except subprocess.TimeoutExpired:
         logger.error("XeLaTeX compilation timed out after 60 seconds")
@@ -195,3 +190,8 @@ async def compile_latex(request: ResumeRequest, background_tasks: BackgroundTask
         media_type='application/pdf',
         filename=f"{request.file_name}.pdf"
     )
+
+@app.post("/compile/raw")
+async def compile_raw_latex(request: ResumeRequest, background_tasks: BackgroundTasks):
+    """Compile raw LaTeX content."""
+    return await compile_latex(request, background_tasks)
