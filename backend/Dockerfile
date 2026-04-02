@@ -26,7 +26,9 @@ RUN pip install --upgrade pip && \
 FROM python:${PYTHON_VERSION}-slim
 
 # Create non-root user.
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+ARG UID=1000
+ARG GID=1000
+RUN groupadd -g $GID -r appuser && useradd -u $UID -r -g appuser appuser
 
 WORKDIR /app
 
