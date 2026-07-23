@@ -35,6 +35,8 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/lto_app_password
       SECRET_KEY_FILE: /run/secrets/secret_key
       GRAFANA_LOKI_URL: http://loki:3100/loki/api/v1/push
+      # Force polling for Docker bind mount file detection (reliable across macOS/Windows/Linux)
+      WATCHFILES_FORCE_POLLING: "true"
     depends_on:
       storage-postgres:
         condition: service_healthy
@@ -98,11 +100,14 @@ services:
       retries: 5
 
   loki:
-    build:
-      context: ./monitoring/loki
-      dockerfile: Dockerfile.loki
+    image: grafana/loki:latest
     container_name: lto-loki
-    #user: "10001:10001"
+    command: -config.file=/etc/loki/loki-config.yaml
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    user: "10001:10001"
     ports:
       - "3100:3100"
     volumes:
@@ -110,12 +115,13 @@ services:
       - loki_data:/loki
     networks:
       - lto_network
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:3100/ready || exit 1"]
-      start_period: 20s
+      test: ["CMD", "/usr/bin/loki", "-health"]
       interval: 10s
-      timeout: 1s
-      retries: 12
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   # The UI for your logs and metrics.
   grafana:
@@ -160,9 +166,14 @@ services:
     environment:
       BACKEND_PUBLIC_API_URL: http://localhost:8000
       NODE_ENV: development
+      # Enable polling for Docker bind mount file detection (needed for macOS/Windows,
+      # and helps avoid inotify issues on Linux too)
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - /app/.next
     depends_on:
       backend:
         condition: service_healthy
