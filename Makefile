@@ -3,7 +3,7 @@
 	frontend-build frontend-up frontend-down frontend-logs frontend-shell \
 	db-up db-down db-shell migrate \
 	monitoring-up monitoring-down loki-setup \
-	setup openssl clean dev-up
+	setup openssl clean dev-up test test-coverage
 
 # Colors
 GREEN  := \033[0;32m
@@ -45,6 +45,10 @@ help:
 	@echo "  monitoring-up   Start Loki + Grafana + Alloy"
 	@echo "  monitoring-down Stop monitoring stack"
 	@echo "  loki-setup      Fix Loki volume permissions (run after first install or 'make clean')"
+	@echo ""
+	@echo "$(GREEN)Testing:$(NC)"
+	@echo "  test            Run backend tests inside the container"
+	@echo "  test-coverage   Run backend tests with coverage report"
 	@echo ""
 	@echo "$(GREEN)Utilities:$(NC)"
 	@echo "  setup           Create required .secrets and .env.local files"
@@ -207,6 +211,16 @@ clean:
 	else \
 		echo "$(RED)❌ Cancelled.$(NC)"; \
 	fi
+
+test:
+	@echo "$(YELLOW)ℹ️  Running backend tests...$(NC)"
+	docker compose exec -u appuser backend python -m pytest tests/ -v
+	@echo "$(GREEN)✅  Tests complete.$(NC)"
+
+test-coverage:
+	@echo "$(YELLOW)ℹ️  Running backend tests with coverage...$(NC)"
+	docker compose exec -u appuser backend python -m pytest tests/ -v --cov
+	@echo "$(GREEN)✅  Coverage report generated.$(NC)"
 
 dev-up:
 	@echo "$(YELLOW)ℹ️  Full development setup...$(NC)"

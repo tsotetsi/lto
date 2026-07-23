@@ -119,6 +119,64 @@ export default function CVEditor() {
     document.body.removeChild(link);
   }
 
+  const downloadDocx = async () => {
+    const contentToCompile = code.trim() || `\\documentclass{article}
+\\usepackage[a4paper, margin=2cm]{geometry}
+\\begin{document}
+\\sffamily\\Huge\\bfseries
+\\begin{center}
+  Document Blank
+\\end{center}
+\\end{document}`;
+
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/compile/docx`,
+        {
+          tex_content: contentToCompile,
+          file_name: 'my_cv',
+          font: selectedFont,
+        },
+        { responseType: 'blob' }
+      );
+
+      const blob = response.data;
+      if (blob.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        const url = URL.createObjectURL(blob);
+        const date = new Date().toISOString().split('T')[0];
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `cv_${date}.docx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } else {
+        const text = await blob.text();
+        try {
+          const errorData = JSON.parse(text);
+          setError(errorData.detail || 'DOCX conversion failed.');
+        } catch {
+          setError('DOCX conversion failed. Ensure pandoc is installed on the server.');
+        }
+        setShowConsole(true);
+      }
+    } catch (err: unknown) {
+      let msg = 'DOCX conversion failed.';
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as any;
+        if (axiosErr.response?.data instanceof Blob) {
+          const text = await axiosErr.response.data.text();
+          try { msg = JSON.parse(text).detail || msg; } catch { msg = text || msg; }
+        }
+      } else if (err instanceof Error) {
+        msg = err.message;
+      }
+      setError(msg);
+      setShowConsole(true);
+    }
+  }
+
   // Try loading from localStorage on mount.
   useEffect(() => {
     const savedCode = localStorage.getItem(STORAGE_KEYS.CODE);
@@ -312,7 +370,22 @@ export default function CVEditor() {
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Export
+                Export PDF
+              </button>
+
+              <button
+                onClick={downloadDocx}
+                disabled={isCompiling}
+                className={`inline-flex items-center justify-center gap-1.5 text-[10px] uppercase font-bold px-3 py-1.5 rounded transition-all whitespace-nowrap ${
+                  isCompiling
+                    ? 'bg-theme-secondary text-theme-muted cursor-not-allowed'
+                    : 'bg-theme-secondary hover:bg-theme-header text-theme-primary border border-theme-primary shadow-sm'
+                }`}
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                DOCX
               </button>
 
               <div className="flex-1" />
@@ -397,8 +470,7 @@ export default function CVEditor() {
           </div>
         }
         leftLabel="Editor"
-        right={
-          <div className="bg-[#1e1e1e] h-full flex flex-col">
+        right={            <div className="bg-theme-editor h-full flex flex-col">
             {pdfUrl ? (
               <iframe
                 key={pdfUrl}
