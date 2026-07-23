@@ -99,10 +99,10 @@ class TemplateManager:
     \\vspace{4pt}
 
     \\small
-    \\href{{mailto:{email}}}{{📧 {email}}} | 
-    \\href{{tel:{phone}}}{{📱 {phone}}} | 
-    \\href{{{linkedin}}}{{💼 LinkedIn}} | 
-    \\href{{{github}}}{{🐙 GitHub}}
+    \\href{mailto:{{email}}}{📧 {{email}}} | 
+    \\href{tel:{{phone}}}{📱 {{phone}}} | 
+    \\href{{{linkedin}}}{💼 LinkedIn} | 
+    \\href{{{github}}}{🐙 GitHub}
     \\vspace{8pt}
 
     \\rule{\\textwidth}{0.5pt}
@@ -110,26 +110,26 @@ class TemplateManager:
 
 \\vspace{-10pt}
 \\section*{{\\color{accent}🎯 Professional Summary}}
-{summary}
+{{summary}}
 
 \\section*{{\\color{accent}💼 Experience}}
 \\begin{itemize}[leftmargin=*]
-{experience}
+{{experience}}
 \\end{itemize}
 
 \\section*{{\\color{accent}🎓 Education}}
 \\begin{itemize}[leftmargin=*]
-{education}
+{{education}}
 \\end{itemize}
 
 \\section*{{\\color{accent}🛠️ Technical Skills}}
 \\begin{itemize}[leftmargin=*]
-{skills}
+{{skills}}
 \\end{itemize}
 
 \\section*{{\\color{accent}🏆 Projects}}
 \\begin{itemize}[leftmargin=*]
-{projects}
+{{projects}}
 \\end{itemize}
 
 \\end{document}""",
@@ -204,31 +204,31 @@ class TemplateManager:
 
 \\section*{Contact}
 \\begin{tabular}{@{}l@{}}
-Email: {email}\\\\
-Phone: {phone}\\\\
-Location: {location}\\\\
-LinkedIn: {linkedin}\\\\
-GitHub: {github}
+Email: {{var}}\\\\
+Phone: {{var}}\\\\
+Location: {{var}}\\\\
+LinkedIn: {{var}}\\\\
+GitHub: {{var}}
 \\end{tabular}
 
 \\section*{Education}
-{education}
+{{education}}
 
 \\section*{Skills}
-{skills}
+{{skills}}
 
 \\columnbreak
 
 \\section*{Experience}
-{experience}
+{{experience}}
 
 \\section*{Certifications}
-{certifications}
+{{certifications}}
 
 \\end{multicols}
 
 \\section*{Professional Summary}
-{summary}
+{{summary}}
 
 \\end{document}""",
             variables={
@@ -274,9 +274,9 @@ GitHub: {github}
 \\begin{document}
 
 \\begin{flushright}
-    {\\bfseries {sender_name}}\\\\
-    {sender_address}\\\\
-    {sender_city}, {sender_postal_code}\\\\
+    {\\bfseries {{sender_name}}}\\\\
+    {{sender_address}}\\\\
+    {{sender_city}}, {{sender_postal_code}}\\\\
     \\href{{mailto:{sender_email}}}{{{sender_email}}}\\\\
     \\href{{tel:{sender_phone}}}{{{sender_phone}}}
 \\end{flushright}
@@ -284,45 +284,45 @@ GitHub: {github}
 \\vspace{12pt}
 
 \\begin{flushleft}
-    {recipient_name}\\\\
-    {recipient_title}\\\\
-    {recipient_company}\\\\
-    {recipient_address}\\\\
-    {recipient_city}, {recipient_postal_code}
+    {{recipient_name}}\\\\
+    {{recipient_title}}\\\\
+    {{recipient_company}}\\\\
+    {{recipient_address}}\\\\
+    {{recipient_city}}, {{recipient_postal_code}}
 \\end{flushleft}
 
 \\vspace{12pt}
 
-{date}
+{{date}}
 
 \\vspace{12pt}
 
-\\textbf{Re: {subject}}
+\\textbf{Re: {{subject}}}
 
 \\vspace{12pt}
 
-{opening}
+{{opening}}
 
 \\vspace{6pt}
 
-{body_first}
+{{body_first}}
 
 \\vspace{6pt}
 
-{body_second}
+{{body_second}}
 
 \\vspace{6pt}
 
-{body_third}
+{{body_third}}
 
 \\vspace{12pt}
 
-{closing}
+{{closing}}
 
 \\vspace{24pt}
 
 \\hspace{2in}
-{sender_name}
+{{sender_name}}
 
 \\end{document}""",
             variables={

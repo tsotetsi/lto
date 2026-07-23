@@ -47,6 +47,7 @@ RUN echo "deb http://deb.debian.org/debian bookworm main contrib non-free" > /et
     fontconfig \
     fonts-liberation \
     ttf-mscorefonts-installer \
+    pandoc \
     curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 

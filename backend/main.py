@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 
 from config import get_settings
 from utils.logging import setup_logging
-from services import compile_latex, ResumeRequest
+from services import compile_latex, compile_docx, ResumeRequest
 from templates.router import router as tmpl_router
 
 # Resumes router requires DB — import lazily so the app starts without Postgres.
@@ -106,3 +106,12 @@ async def compile_raw_latex(
 ):
     """Compile raw LaTeX content and return the resulting PDF."""
     return await compile_latex(request, background_tasks)
+
+
+@app.post("/compile/docx")
+async def compile_raw_docx(
+    request: ResumeRequest,
+    background_tasks: BackgroundTasks,
+):
+    """Compile raw LaTeX content and return the resulting DOCX."""
+    return await compile_docx(request, background_tasks)

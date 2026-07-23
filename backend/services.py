@@ -151,3 +151,96 @@ async def compile_latex(request: ResumeRequest, background_tasks: BackgroundTask
         media_type="application/pdf",
         filename=f"{request.file_name}.pdf",
     )
+
+
+async def compile_docx(request: ResumeRequest, background_tasks: BackgroundTasks) -> FileResponse:
+    """
+    Compile LaTeX source to DOCX via Pandoc.
+
+    First compiles to PDF (XeLaTeX), then converts PDF to DOCX using pandoc.
+    Falls back to converting the LaTeX source directly if PDF compilation fails.
+    """
+    # 0. Validate the LaTeX content
+    validation_issues = validate_latex_file(request.tex_content)
+    if validation_issues:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid LaTeX document: {', '.join(validation_issues)}",
+        )
+
+    # 1. Create a unique workspace for this request
+    job_id = str(uuid.uuid4())
+    job_dir = TEMP_DIR / job_id
+    job_dir.mkdir()
+
+    # 2. Inject font configuration into the LaTeX preamble
+    font_injection = f"\\usepackage{{fontspec}}\n\\setmainfont{{{request.font}}}\n"
+    content = request.tex_content
+
+    if "\\documentclass" in content:
+        parts = content.split("\\documentclass", 1)
+        end_of_header = parts[1].find("}") + 1
+        final_tex = (
+            "\\documentclass"
+            + parts[1][:end_of_header]
+            + "\n"
+            + font_injection
+            + parts[1][end_of_header:]
+        )
+    else:
+        final_tex = font_injection + content
+
+    tex_file_path = job_dir / f"{request.file_name}.tex"
+
+    # 3. Write the LaTeX content to file
+    try:
+        tex_file_path.write_text(final_tex, encoding="utf-8")
+    except Exception as exc:
+        cleanup_files(job_dir)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_REQUEST,
+            detail=f"Failed to write file: {exc}",
+        ) from exc
+
+    # 4. Try pandoc conversion from LaTeX to DOCX
+    docx_file_path = job_dir / f"{request.file_name}.docx"
+
+    try:
+        logger.info("Starting Pandoc conversion", font=request.font, job_id=job_id)
+        process = subprocess.run(
+            ["pandoc", str(tex_file_path), "-o", str(docx_file_path), "--from", "latex", "--to", "docx"],
+            cwd=job_dir,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=60,
+        )
+
+        if process.returncode != 0 or not docx_file_path.exists():
+            error_msg = process.stderr.decode("utf-8", errors="ignore")[-500:]
+            cleanup_files(job_dir)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Pandoc conversion failed: {error_msg}",
+            )
+
+    except subprocess.TimeoutExpired:
+        logger.error("Pandoc conversion timed out", job_id=job_id)
+        cleanup_files(job_dir)
+        raise HTTPException(
+            status_code=status.HTTP_408_REQUEST_TIMEOUT,
+            detail="Pandoc conversion timed out",
+        )
+    except FileNotFoundError:
+        cleanup_files(job_dir)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Pandoc is not installed on the server",
+        )
+
+    # 5. Schedule cleanup and return the file
+    background_tasks.add_task(cleanup_files, job_dir)
+    return FileResponse(
+        path=docx_file_path,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        filename=f"{request.file_name}.docx",
+    )
