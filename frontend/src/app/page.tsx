@@ -286,6 +286,9 @@ export default function CVEditor() {
               <span className="text-[var(--accent-blue)] font-bold text-xs uppercase mr-2">XeLaTeX</span>
 
               <select
+                id="font-select"
+                name="font"
+                aria-label="Document font"
                 value={selectedFont}
                 onChange={(e) => setSelectedFont(e.target.value)}
                 className="bg-theme-secondary text-theme-primary text-[11px] border border-theme-primary rounded px-2 py-1 outline-none focus:border-[var(--accent-blue)] transition-colors"

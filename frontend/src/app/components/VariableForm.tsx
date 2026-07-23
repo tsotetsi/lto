@@ -79,12 +79,15 @@ const VariableForm: React.FC<VariableFormProps> = ({
     const error = errors[variableName];
     
     if (variable.type === 'multiline') {
+      const inputId = `var-${variableName}`;
       return (
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label htmlFor={inputId} className="block text-sm font-medium mb-2">
             {variable.label} {variable.required && <span className="text-red-500">*</span>}
           </label>
           <textarea
+            id={inputId}
+            name={variableName}
             value={value}
             onChange={(e) => handleChange(variableName, e.target.value)}
             className={`w-full px-3 py-2 bg-gray-800 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -98,12 +101,15 @@ const VariableForm: React.FC<VariableFormProps> = ({
       );
     }
     
+    const inputId = `var-${variableName}`;
     return (
       <div>
-        <label className="block text-sm font-medium mb-2">
+        <label htmlFor={inputId} className="block text-sm font-medium mb-2">
           {variable.label} {variable.required && <span className="text-red-500">*</span>}
         </label>
         <input
+          id={inputId}
+          name={variableName}
           type={variable.type === 'email' ? 'email' : 'text'}
           value={value}
           onChange={(e) => handleChange(variableName, e.target.value)}
