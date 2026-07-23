@@ -3,7 +3,7 @@
 	frontend-build frontend-up frontend-down frontend-logs frontend-shell \
 	db-up db-down db-shell migrate \
 	monitoring-up monitoring-down loki-setup \
-	setup openssl clean dev-up test test-coverage
+	setup openssl clean dev-up test test-coverage githooks-install
 
 # Colors
 GREEN  := \033[0;32m
@@ -49,6 +49,9 @@ help:
 	@echo "$(GREEN)Testing:$(NC)"
 	@echo "  test            Run backend tests inside the container"
 	@echo "  test-coverage   Run backend tests with coverage report"
+	@echo ""
+	@echo "$(GREEN)Git Hooks:$(NC)"
+	@echo "  githooks-install Install pre-commit hooks from .githooks/"
 	@echo ""
 	@echo "$(GREEN)Utilities:$(NC)"
 	@echo "  setup           Create required .secrets and .env.local files"
@@ -221,6 +224,12 @@ test-coverage:
 	@echo "$(YELLOW)ℹ️  Running backend tests with coverage...$(NC)"
 	docker compose exec -u appuser backend python -m pytest tests/ -v --cov
 	@echo "$(GREEN)✅  Coverage report generated.$(NC)"
+
+githooks-install:
+	@echo "$(YELLOW)ℹ️  Installing git hooks from .githooks/...$(NC)"
+	git config core.hooksPath .githooks
+	@echo "$(GREEN)✅  Git hooks installed. Pre-commit tests will run on every 'git commit'.$(NC)"
+	@echo "  To bypass: SKIP_TESTS=1 git commit"
 
 dev-up:
 	@echo "$(YELLOW)ℹ️  Full development setup...$(NC)"
