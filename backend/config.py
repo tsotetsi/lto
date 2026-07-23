@@ -33,29 +33,24 @@ class Settings(BaseSettings):
     # Environment Configuration
     ENVIRONMENT: str = Field("local")
     DEBUG: bool = Field(True)
-    SECRET_KEY: str = Field(..., validation_alias="SECRET_KEY")
+    SECRET_KEY: str = Field(..., validation_alias="SECRET_KEY_FILE")
 
     # PostgreSQL Configuration
-    POSTGRES_USER: str = Field("lto_postgres_user")
-    POSTGRES_PASSWORD: str = Field(...)
+    POSTGRES_USER: str = Field("lto_postgres_user", validation_alias="POSTGRES_USER_FILE")
+    POSTGRES_PASSWORD: str = Field(..., validation_alias="POSTGRES_PASSWORD_FILE")
     POSTGRES_DB: str = Field("lto")
     POSTGRES_HOST: str = Field("storage-postgres")
     POSTGRES_PORT: int = Field(5432)
 
+    _resolve_secrets = field_validator(
+        "POSTGRES_USER",
+        "POSTGRES_PASSWORD",
+        "SECRET_KEY",
+        mode="before"
+    )(resolve_secret)
+
     # Monitoring Configurations
     GRAFANA_LOKI_URL: str = Field("http://loki:3100")
-
-    @field_validator(
-        "POSTGRES_USER", "POSTGRES_PASSWORD", "SECRET_KEY",
-        mode="before"
-    )
-    @classmethod
-    def read_secret_files(cls, v: str) -> str:
-        """Automatically converts path strings to the file's content."""
-        resolved = resolve_secret(v)
-        if not resolved:
-            raise ValueError(f"Secret value is empty or file not found: {v}")
-        return resolved
 
     @computed_field
     @property
@@ -71,6 +66,7 @@ class Settings(BaseSettings):
         case_sensitive=True,
         env_prefix="",
         extra="ignore",
+        secrets_dir="/run/secrets"
     )
 
 @lru_cache

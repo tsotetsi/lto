@@ -3,7 +3,7 @@ import structlog
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy import text
 
-from .config import get_settings
+from config import get_settings
 
 
 logger = structlog.get_logger("lto-api")

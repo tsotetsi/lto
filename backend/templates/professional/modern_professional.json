@@ -1,0 +1,84 @@
+{
+  "id": "modern_professional",
+  "name": "Modern Professional",
+  "description": "Clean, contemporary design with emphasis on skills",
+  "category": "professional",
+  "thumbnail": null,
+  "tex_content": "\\documentclass[a4paper,10pt]{article}\n\\usepackage{fontspec}\n\\usepackage{geometry}\n\\usepackage{xcolor}\n\\usepackage{parskip}\n\\usepackage{enumitem}\n\\usepackage{hyperref}\n\n\\geometry{margin=0.75in}\n\\setlist{noitemsep}\n\\setlength{\\parskip}{4pt}\n\n% Colors\n\\definecolor{accent}{RGB}{41, 128, 185}\n\n% Font\n\\setmainfont{{{font}}}\n\n\\begin{document}\n\n\\begin{center}\n    {\\color{accent}\\Huge\\textbf{{{name}}}}\n    \\vspace{4pt}\n\n    \\small\n    \\href{{mailto:{email}}}{{\ud83d\udce7 {email}}} | \n    \\href{{tel:{phone}}}{{\ud83d\udcf1 {phone}}} | \n    \\href{{{linkedin}}}{{\ud83d\udcbc LinkedIn}} | \n    \\href{{{github}}}{{\ud83d\udc19 GitHub}}\n    \\vspace{8pt}\n\n    \\rule{\\textwidth}{0.5pt}\n\\end{center}\n\n\\vspace{-10pt}\n\\section*{{\\color{accent}\ud83c\udfaf Professional Summary}}\n{summary}\n\n\\section*{{\\color{accent}\ud83d\udcbc Experience}}\n\\begin{itemize}[leftmargin=*]\n{experience}\n\\end{itemize}\n\n\\section*{{\\color{accent}\ud83c\udf93 Education}}\n\\begin{itemize}[leftmargin=*]\n{education}\n\\end{itemize}\n\n\\section*{{\\color{accent}\ud83d\udee0\ufe0f Technical Skills}}\n\\begin{itemize}[leftmargin=*]\n{skills}\n\\end{itemize}\n\n\\section*{{\\color{accent}\ud83c\udfc6 Projects}}\n\\begin{itemize}[leftmargin=*]\n{projects}\n\\end{itemize}\n\n\\end{document}",
+  "variables": {
+    "name": {
+      "name": "name",
+      "label": "Full Name",
+      "default": "John Doe",
+      "required": true,
+      "type": "text"
+    },
+    "email": {
+      "name": "email",
+      "label": "Email",
+      "default": "john@example.com",
+      "required": true,
+      "type": "text"
+    },
+    "phone": {
+      "name": "phone",
+      "label": "Phone",
+      "default": "+1 (123) 456-7890",
+      "required": true,
+      "type": "text"
+    },
+    "linkedin": {
+      "name": "linkedin",
+      "label": "LinkedIn URL",
+      "default": "linkedin.com/in/johndoe",
+      "required": true,
+      "type": "text"
+    },
+    "github": {
+      "name": "github",
+      "label": "GitHub URL",
+      "default": "github.com/johndoe",
+      "required": true,
+      "type": "text"
+    },
+    "summary": {
+      "name": "summary",
+      "label": "Professional Summary",
+      "default": "Experienced software engineer with 5+ years in full-stack development...",
+      "required": true,
+      "type": "multiline"
+    },
+    "experience": {
+      "name": "experience",
+      "label": "Experience Items",
+      "default": "\\item \\textbf{Senior Software Engineer} at TechCorp (2020-Present)\\newline Led team of 5 developers...",
+      "required": true,
+      "type": "multiline"
+    },
+    "education": {
+      "name": "education",
+      "label": "Education",
+      "default": "\\item \\textbf{M.S. Computer Science}, Stanford University (2018)\\newline GPA: 3.9/4.0",
+      "required": true,
+      "type": "multiline"
+    },
+    "skills": {
+      "name": "skills",
+      "label": "Skills",
+      "default": "\\item \\textbf{Languages}: Python, JavaScript, TypeScript, Go\\newline \\textbf{Frameworks}: React, Node.js, Django, FastAPI",
+      "required": true,
+      "type": "multiline"
+    },
+    "projects": {
+      "name": "projects",
+      "label": "Projects",
+      "default": "\\item \\textbf{Resume Builder} - Open-source LaTeX resume builder with real-time preview",
+      "required": true,
+      "type": "multiline"
+    }
+  },
+  "font": "Liberation Sans",
+  "created_at": "2024-01-01",
+  "updated_at": "2024-01-01",
+  "is_free": true
+}

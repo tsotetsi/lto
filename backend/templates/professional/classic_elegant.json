@@ -1,0 +1,91 @@
+{
+  "id": "classic_elegant",
+  "name": "Classic Elegant",
+  "description": "Traditional two-column layout with formal styling",
+  "category": "professional",
+  "thumbnail": null,
+  "tex_content": "\\documentclass[a4paper,11pt]{article}\n\\usepackage{fontspec}\n\\usepackage{geometry}\n\\usepackage{tabularx}\n\\usepackage{ragged2e}\n\\usepackage{parskip}\n\n\\geometry{margin=1in}\n\\setlength{\\parskip}{6pt}\n\n% Two columns\n\\usepackage{multicol}\n\\setlength{\\columnsep}{1cm}\n\n\\setmainfont{{{font}}}\n\n\\begin{document}\n\n\\begin{center}\n    {\\LARGE\\textbf{{{name}}}}\n    \\vspace{6pt}\n    \n    \\small\n    {email} | {phone} | {location}\n\\end{center}\n\n\\vspace{10pt}\n\n\\begin{multicols}{2}\n\n\\section*{Contact}\n\\begin{tabular}{@{}l@{}}\nEmail: {email}\\\\\nPhone: {phone}\\\\\nLocation: {location}\\\\\nLinkedIn: {linkedin}\\\\\nGitHub: {github}\n\\end{tabular}\n\n\\section*{Education}\n{education}\n\n\\section*{Skills}\n{skills}\n\n\\columnbreak\n\n\\section*{Experience}\n{experience}\n\n\\section*{Certifications}\n{certifications}\n\n\\end{multicols}\n\n\\section*{Professional Summary}\n{summary}\n\n\\end{document}",
+  "variables": {
+    "name": {
+      "name": "name",
+      "label": "Full Name",
+      "default": "",
+      "required": true,
+      "type": "text"
+    },
+    "email": {
+      "name": "email",
+      "label": "Email",
+      "default": "",
+      "required": true,
+      "type": "text"
+    },
+    "phone": {
+      "name": "phone",
+      "label": "Phone",
+      "default": "",
+      "required": true,
+      "type": "text"
+    },
+    "location": {
+      "name": "location",
+      "label": "Location",
+      "default": "",
+      "required": true,
+      "type": "text"
+    },
+    "linkedin": {
+      "name": "linkedin",
+      "label": "LinkedIn",
+      "default": "",
+      "required": true,
+      "type": "text"
+    },
+    "github": {
+      "name": "github",
+      "label": "GitHub",
+      "default": "",
+      "required": true,
+      "type": "text"
+    },
+    "summary": {
+      "name": "summary",
+      "label": "Summary",
+      "default": "",
+      "required": true,
+      "type": "multiline"
+    },
+    "education": {
+      "name": "education",
+      "label": "Education",
+      "default": "",
+      "required": true,
+      "type": "multiline"
+    },
+    "experience": {
+      "name": "experience",
+      "label": "Experience",
+      "default": "",
+      "required": true,
+      "type": "multiline"
+    },
+    "skills": {
+      "name": "skills",
+      "label": "Skills",
+      "default": "",
+      "required": true,
+      "type": "multiline"
+    },
+    "certifications": {
+      "name": "certifications",
+      "label": "Certifications",
+      "default": "",
+      "required": true,
+      "type": "multiline"
+    }
+  },
+  "font": "Liberation Serif",
+  "created_at": "2024-01-01",
+  "updated_at": "2024-01-01",
+  "is_free": true
+}

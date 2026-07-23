@@ -1,0 +1,147 @@
+{
+  "id": "cover_letter_standard",
+  "name": "Professional Cover Letter",
+  "description": "Standard business letter format for job applications",
+  "category": "cover-letter",
+  "thumbnail": null,
+  "tex_content": "\\documentclass[a4paper,11pt]{letter}\n\\usepackage{fontspec}\n\\usepackage{geometry}\n\\usepackage{parskip}\n\\usepackage{hyperref}\n\n\\geometry{margin=1in}\n\\setlength{\\parskip}{6pt}\n\n\\setmainfont{{{font}}}\n\n\\begin{document}\n\n\\begin{flushright}\n    {\\bfseries {sender_name}}\\\\\n    {sender_address}\\\\\n    {sender_city}, {sender_postal_code}\\\\\n    \\href{{mailto:{sender_email}}}{{{sender_email}}}\\\\\n    \\href{{tel:{sender_phone}}}{{{sender_phone}}}\n\\end{flushright}\n\n\\vspace{12pt}\n\n\\begin{flushleft}\n    {recipient_name}\\\\\n    {recipient_title}\\\\\n    {recipient_company}\\\\\n    {recipient_address}\\\\\n    {recipient_city}, {recipient_postal_code}\n\\end{flushleft}\n\n\\vspace{12pt}\n\n{date}\n\n\\vspace{12pt}\n\n\\textbf{Re: {subject}}\n\n\\vspace{12pt}\n\n{opening}\n\n\\vspace{6pt}\n\n{body_first}\n\n\\vspace{6pt}\n\n{body_second}\n\n\\vspace{6pt}\n\n{body_third}\n\n\\vspace{12pt}\n\n{closing}\n\n\\vspace{24pt}\n\n\\hspace{2in}\n{sender_name}\n\n\\end{document}",
+  "variables": {
+    "sender_name": {
+      "name": "sender_name",
+      "label": "Your Full Name",
+      "default": "Jane Doe",
+      "required": true,
+      "type": "text"
+    },
+    "sender_address": {
+      "name": "sender_address",
+      "label": "Your Street Address",
+      "default": "123 Main Street",
+      "required": true,
+      "type": "text"
+    },
+    "sender_city": {
+      "name": "sender_city",
+      "label": "Your City",
+      "default": "Johannesburg",
+      "required": true,
+      "type": "text"
+    },
+    "sender_postal_code": {
+      "name": "sender_postal_code",
+      "label": "Your Postal Code",
+      "default": "2001",
+      "required": true,
+      "type": "text"
+    },
+    "sender_email": {
+      "name": "sender_email",
+      "label": "Your Email",
+      "default": "jane@example.com",
+      "required": true,
+      "type": "text"
+    },
+    "sender_phone": {
+      "name": "sender_phone",
+      "label": "Your Phone",
+      "default": "+27 82 123 4567",
+      "required": true,
+      "type": "text"
+    },
+    "recipient_name": {
+      "name": "recipient_name",
+      "label": "Recipient Name",
+      "default": "Dr. John Smith",
+      "required": true,
+      "type": "text"
+    },
+    "recipient_title": {
+      "name": "recipient_title",
+      "label": "Recipient Title",
+      "default": "Hiring Manager",
+      "required": true,
+      "type": "text"
+    },
+    "recipient_company": {
+      "name": "recipient_company",
+      "label": "Company Name",
+      "default": "TechCorp Ltd.",
+      "required": true,
+      "type": "text"
+    },
+    "recipient_address": {
+      "name": "recipient_address",
+      "label": "Company Address",
+      "default": "456 Business Avenue",
+      "required": true,
+      "type": "text"
+    },
+    "recipient_city": {
+      "name": "recipient_city",
+      "label": "Company City",
+      "default": "Cape Town",
+      "required": true,
+      "type": "text"
+    },
+    "recipient_postal_code": {
+      "name": "recipient_postal_code",
+      "label": "Company Postal Code",
+      "default": "8001",
+      "required": true,
+      "type": "text"
+    },
+    "date": {
+      "name": "date",
+      "label": "Date",
+      "default": "\\today",
+      "required": true,
+      "type": "text"
+    },
+    "subject": {
+      "name": "subject",
+      "label": "Subject Line",
+      "default": "Application for Software Engineer Position",
+      "required": true,
+      "type": "text"
+    },
+    "opening": {
+      "name": "opening",
+      "label": "Salutation / Opening",
+      "default": "Dear Dr. Smith,",
+      "required": true,
+      "type": "text"
+    },
+    "body_first": {
+      "name": "body_first",
+      "label": "Body Paragraph 1",
+      "default": "I am writing to express my strong interest in the Software Engineer position at TechCorp. With over five years of experience building scalable web applications and a passion for elegant system design, I am confident that my skills align perfectly with your team's needs.",
+      "required": true,
+      "type": "multiline"
+    },
+    "body_second": {
+      "name": "body_second",
+      "label": "Body Paragraph 2",
+      "default": "In my current role at InnovateTech, I spearheaded the development of a real-time analytics platform that reduced customer churn by 15%. I led a cross-functional team of eight engineers, modernised our CI/CD pipeline, and introduced automated testing that cut deployment failures by 40%.",
+      "required": true,
+      "type": "multiline"
+    },
+    "body_third": {
+      "name": "body_third",
+      "label": "Body Paragraph 3",
+      "default": "I am particularly drawn to TechCorp's commitment to open-source software and developer experience. I have been a long-time user of your tools and would be thrilled to contribute to the team that builds them.",
+      "required": true,
+      "type": "multiline"
+    },
+    "closing": {
+      "name": "closing",
+      "label": "Closing",
+      "default": "Thank you for considering my application. I look forward to discussing how my experience can contribute to TechCorp's continued success.",
+      "required": true,
+      "type": "multiline"
+    }
+  },
+  "font": "Liberation Serif",
+  "created_at": "2024-01-01",
+  "updated_at": "2024-01-01",
+  "is_free": true
+}
