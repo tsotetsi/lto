@@ -20,6 +20,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
     restart: unless-stopped
     environment:
       LOG_LEVEL: info
@@ -44,6 +47,17 @@ services:
     secrets:
       - lto_app_user
       - lto_app_password
+      - secret_key
+      - healthcheck_user
+      - healthcheck_password
+      - postgres_user
+      - postgres_password
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels-regex: "lto-backend"
     networks:
       - lto_network
     healthcheck:
@@ -97,7 +111,7 @@ services:
     networks:
       - lto_network
     healthcheck:
-      test: wget --quiet --tries=1 --spider http://localhost:3100/ready || exit 1
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:3100/ready || exit 1"]
       start_period: 20s
       interval: 10s
       timeout: 1s
