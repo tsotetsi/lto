@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ThemeProvider } from "./context/ThemeContext";
 
 export const metadata: Metadata = {
   title: "Lethathamo | Resume/CV Builder",
@@ -12,12 +13,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      {/* The h-full and overflow-hidden here are key 
-        to making your split-pane columns work correctly 
-      */}
-      <body className="h-screen w-screen overflow-hidden antialiased">
-        {children}
+    <html lang="en" className="dark-theme">
+      <body className="h-screen w-screen overflow-hidden antialiased bg-theme-primary text-theme-primary transition-colors duration-200">
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

@@ -25,15 +25,15 @@ ENV NODE_ENV=production
 RUN npm run build
 
 # Stage 3: Runner
-FROM node:22-alpine AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 --gid nodejs nextjs
 
 # Copy necessary files from builder
 COPY --from=builder /app/public ./public
@@ -61,8 +61,13 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
 CMD ["node", "server.js"]
 
 # Stage 4: Development
-FROM node:22-alpine AS dev
+FROM node:22-slim AS dev
 WORKDIR /app
+
+# Install required system dependencies for Next.js
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy package files and install all dependencies
 COPY package*.json ./
@@ -74,4 +79,6 @@ COPY . .
 
 # Expose port and start the development server
 EXPOSE 3000
-CMD ["npm", "run", "dev"]
+
+# Use exec form with node directly for better signal handling
+CMD ["node", "node_modules/.bin/next", "dev", "-H", "0.0.0.0", "-p", "3000"]

@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import Editor from '@monaco-editor/react';
+import React, { useState, useEffect, useRef } from 'react';
+import Editor, { OnMount } from '@monaco-editor/react';
 import axios from 'axios';
-import { env } from 'node:process';
-
-console.log(env)
+import SplitPane from './components/SplitPane';
+import ThemeToggle from './components/ThemeToggle';
+import { useTheme } from './context/ThemeContext';
 
 const STORAGE_KEYS = {
   CODE: 'cv_editor_code',
@@ -53,6 +53,7 @@ Tools & Docker, Git, Next.js, FastAPI \\\\
 ];
 
 export default function CVEditor() {
+  const { theme } = useTheme();
   
   // Initialize with empty or default values.
   const [code, setCode] = useState<string>('');
@@ -66,7 +67,7 @@ export default function CVEditor() {
   const [showConsole, setShowConsole] = useState(true);
 
   // Monaco Editor instance Ref.
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<import('monaco-editor').editor.IStandaloneCodeEditor | null>(null);
 
   // Refs to track state without triggering re-renders or dependency loops.
   const lastCompiledCodeRef = useRef<string>('');
@@ -79,6 +80,9 @@ export default function CVEditor() {
 
     const editor = editorRef.current;
     const selection = editor.getSelection();
+    if (!selection) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const range = new (window as any).monaco.Range(
       selection.startLineNumber,
       selection.startColumn,
@@ -96,7 +100,7 @@ export default function CVEditor() {
   };
 
   // Capture editor instance on mount.
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount: OnMount = (editor) => {
     editorRef.current = editor;
   };
 
@@ -196,7 +200,7 @@ export default function CVEditor() {
             setError(null);
             setPdfUrl(null);
             setShowConsole(true);
-          } catch (e) {
+          } catch {
             setError('Failed to parse server response');
           }
         } else {
@@ -205,29 +209,33 @@ export default function CVEditor() {
           try {
             const errorData = JSON.parse(errorText);
             errorMessage = errorData.detail || 'Compilation failed.';
-          } catch (e) {
+          } catch {
             if (errorText) errorMessage = errorText;
           }
           setError(errorMessage);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         let errorMessage = 'An unknown compilation error occurred.';
-        if (err.response?.data) {
-          if (err.response.data instanceof Blob) {
-            const text = await err.response.data.text();
-            try {
-              const errorData = JSON.parse(text);
-              errorMessage = errorData.detail || 'Could not find details in error log.';
-            } catch {
-              errorMessage = text || 'Failed to read error log blob.';
+        if (err && typeof err === 'object' && 'response' in err) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const axiosError = err as any;
+          if (axiosError.response?.data) {
+            if (axiosError.response.data instanceof Blob) {
+              const text = await axiosError.response.data.text();
+              try {
+                const errorData = JSON.parse(text);
+                errorMessage = errorData.detail || 'Could not find details in error log.';
+              } catch {
+                errorMessage = text || 'Failed to read error log blob.';
+              }
+            } else if (axiosError.response.data.detail) {
+              errorMessage = axiosError.response.data.detail;
+            } else if (axiosError.message) {
+              errorMessage = axiosError.message;
             }
-          } else if (err.response.data.detail) {
-            errorMessage = err.response.data.detail;
-          } else {
-            errorMessage = err.message || 'Connection to compiler lost.';
           }
-        } else {
-          errorMessage = err.message || 'A network error occurred.';
+        } else if (err instanceof Error) {
+          errorMessage = err.message;
         }
                 setError(errorMessage);
         setShowConsole(true);
@@ -246,121 +254,175 @@ export default function CVEditor() {
       return <div className="h-screen w-screen bg-gray-900 flex items-center justify-center text-white">Loading Workspace...</div>;
     }
 
-  return (
-    <main className="flex h-screen w-screen overflow-hidden bg-gray-900 text-white font-sans">
-      {/* Left Column */}
+  const monacoTheme = theme === 'dark' ? 'vs-dark' : 'light';
 
-      {/* 1. Snippet Sidebar (New!) */}
-      <div className="w-48 bg-gray-950 border-r border-gray-800 flex flex-col shrink-0">
-        <div className="p-4 border-b border-gray-800">
-          <h2 className="text-[10px] uppercase font-bold tracking-widest text-gray-500">Library</h2>
+  return (
+    <main className="flex h-screen w-screen overflow-hidden bg-theme-primary text-theme-primary font-sans transition-colors duration-200">
+      {/* Snippet Sidebar */}
+      <div className="w-48 bg-theme-sidebar border-r border-theme-primary flex flex-col shrink-0">
+        <div className="p-4 border-b border-theme-primary">
+          <h2 className="text-[10px] uppercase font-bold tracking-widest text-theme-muted">Library</h2>
         </div>
         <div className="p-2 flex flex-col gap-2 overflow-y-auto">
           {RESUME_SNIPPETS.map((snippet) => (
             <button
               key={snippet.label}
               onClick={() => insertSnippet(snippet.code)}
-              className="text-left text-[11px] p-2 bg-gray-900 hover:bg-blue-900 border border-gray-800 rounded transition-colors group"
+              className="text-left text-[11px] p-2 bg-theme-primary hover:bg-blue-900/20 border border-theme-primary rounded transition-colors group"
             >
-              <span className="block font-medium">{snippet.label}</span>
-              <span className="text-[9px] text-gray-500 group-hover:text-blue-200">Click to insert</span>
+              <span className="block font-medium text-theme-primary">{snippet.label}</span>
+              <span className="text-[9px] text-theme-muted group-hover:text-blue-400">Click to insert</span>
             </button>
           ))}
         </div>
       </div>
 
-      <div className="w-1/2 flex flex-col border-r border-gray-700 h-full">
-        {/* Updated Header with Dropdown */}
-        <div className="p-3 bg-gray-800 flex justify-between items-center shrink-0 border-b border-gray-700">
-          <div className="flex items-center gap-4">
-            <span className="text-blue-400 font-bold text-xs uppercase">XeLaTeX</span>
-            
-            <select 
-              value={selectedFont}
-              onChange={(e) => setSelectedFont(e.target.value)}
-              className="bg-gray-700 text-[11px] border border-gray-600 rounded px-2 py-1 outline-none focus:border-blue-500"
-            >
-              {AVAILABLE_FONTS.map(f => <option key={f} value={f}>{f}</option>)}
-            </select>
-            <button
-              onClick={downloadPdf}
-              disabled={!pdfUrl || isCompiling}
-              className={`inline-flex items-center justify-center gap-2 text-[10px] uppercase font-bold px-3 py-2 rounded transition-all whitespace-nowrap ${
-                !pdfUrl || isCompiling 
-                  ? 'bg-gray-800 text-gray-600 cursor-not-allowed' 
-                  : 'bg-green-700 hover:bg-green-600 text-white shadow-lg'
-              }`}
-            >
-              <span>Export CV</span>
-            </button>
-          </div>
-          <div className="flex items-center gap-3">
-            {isCompiling && (
+      {/* Split Pane: Editor (Left) vs PDF Preview (Right) */}
+      <SplitPane
+        left={
+          <div className="flex flex-col h-full">
+            {/* Header with toolbar */}
+            <div className="px-3 py-2 bg-theme-header border-b border-theme-primary flex items-center gap-3 shrink-0 transition-colors duration-200">
+              <span className="text-[var(--accent-blue)] font-bold text-xs uppercase mr-2">XeLaTeX</span>
+
+              <select
+                value={selectedFont}
+                onChange={(e) => setSelectedFont(e.target.value)}
+                className="bg-theme-secondary text-theme-primary text-[11px] border border-theme-primary rounded px-2 py-1 outline-none focus:border-[var(--accent-blue)] transition-colors"
+              >
+                {AVAILABLE_FONTS.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                onClick={downloadPdf}
+                disabled={!pdfUrl || isCompiling}
+                className={`inline-flex items-center justify-center gap-1.5 text-[10px] uppercase font-bold px-3 py-1.5 rounded transition-all whitespace-nowrap ${
+                  !pdfUrl || isCompiling
+                    ? 'bg-theme-secondary text-theme-muted cursor-not-allowed'
+                    : 'bg-[var(--accent-green)] hover:opacity-90 text-white shadow-lg'
+                }`}
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export
+              </button>
+
+              <div className="flex-1" />
+
+              <ThemeToggle />
+
+              {isCompiling && (
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
-                  <span className="text-[10px] text-gray-400 uppercase">Compiling...</span>
+                  <div className="w-2 h-2 bg-[var(--accent-blue)] rounded-full animate-ping" />
+                  <span className="text-[10px] text-theme-muted uppercase font-bold">Compiling...</span>
                 </div>
+              )}
+
+              <a
+                href="/template"
+                className="text-[10px] uppercase font-bold px-3 py-1.5 bg-[var(--accent-blue)] hover:opacity-90 text-white rounded transition-all"
+              >
+                Templates
+              </a>
+            </div>
+
+            {/* Monaco Editor */}
+            <div className="flex-grow">
+              <Editor
+                height="100%"
+                defaultLanguage="latex"
+                theme={monacoTheme}
+                value={code}
+                onMount={handleEditorDidMount}
+                onChange={(value) => setCode(value || '')}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 13,
+                  wordWrap: 'on',
+                  lineNumbers: 'on',
+                  renderWhitespace: 'selection',
+                  smoothScrolling: true,
+                  cursorBlinking: 'smooth',
+                }}
+              />
+            </div>
+
+            {/* Terminal/Console */}
+            <div
+              className={`bg-theme-console border-t border-theme-primary flex-col shrink-0 transition-all duration-200 ${
+                showConsole ? 'flex' : 'hidden'
+              }`}
+              style={{ height: '33%' }}
+            >
+              <div className="px-4 py-1.5 bg-theme-header text-[10px] uppercase font-bold text-theme-secondary flex justify-between items-center border-b border-theme-primary">
+                <div className="flex items-center gap-4">
+                  <span
+                    className={error ? 'text-[var(--accent-red)]' : infoMessage ? 'text-[var(--accent-green)]' : ''}
+                  >
+                    {error ? 'Errors' : infoMessage ? 'Success' : 'Compiler Logs'}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowConsole(false)}
+                  className="hover:text-theme-primary transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+              <pre
+                className="flex-1 p-4 overflow-y-auto font-mono text-[11px] whitespace-pre-wrap leading-relaxed"
+                style={{
+                  color: error
+                    ? 'var(--accent-red)'
+                    : infoMessage
+                    ? 'var(--accent-green)'
+                    : 'var(--text-secondary)',
+                }}
+              >
+                {error ||
+                  infoMessage ||
+                  '✓ Build ready. No errors. Start typing LaTeX to compile.'}
+              </pre>
+            </div>
+          </div>
+        }
+        leftLabel="Editor"
+        right={
+          <div className="bg-[#1e1e1e] h-full flex flex-col">
+            {pdfUrl ? (
+              <iframe
+                key={pdfUrl}
+                src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                className="w-full h-full border-none"
+                title="PDF Preview"
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-gray-600 gap-4">
+                <svg className="w-16 h-16 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <div className="text-center">
+                  <p className="text-sm font-medium mb-1">PDF Preview</p>
+                  <p className="text-xs text-gray-500">
+                    Your compiled document will appear here
+                  </p>
+                </div>
+              </div>
             )}
           </div>
-          <button
-            onClick={() => {
-              if (error) {
-                setShowConsole(true); // Keep console open if there's an error
-              } else {
-                setShowConsole(prev => !prev); // Otherwise, toggle
-              }
-            }}
-            className={`text-[10px] uppercase font-bold px-3 py-1 rounded transition-colors ${
-              error ? 'bg-red-600 text-white' : 'bg-gray-700 hover:bg-gray-600'
-            }`}
-          >
-            Terminal {error ? '(!)' : ''}
-          </button>
-        </div>
-
-        {/* Monaco Editor */}
-        <div className="flex-grow">
-          <Editor
-            height="100%"
-            defaultLanguage="latex"
-            theme="vs-dark"
-            value={code}
-            onMount={handleEditorDidMount} // Essential for the snippet logic
-            onChange={(value) => setCode(value || '')}
-            options={{ minimap: { enabled: false }, fontSize: 13, wordWrap: 'on' }}
-          />
-        </div>
-
-        {/* Terminal/Console */}
-        <div className={`h-1/3 bg-[#0a0a0a] border-t border-gray-700 flex-col shrink-0 ${showConsole ? 'flex' : 'hidden'}`}>
-            <div className="px-4 py-1.5 bg-gray-800 text-[10px] uppercase font-bold text-gray-400 flex justify-between items-center">
-              <span>Compiler Logs</span>
-              <button onClick={() => setShowConsole(false)} className="hover:text-white">Close</button>
-            </div>
-            <pre
-              className="p-4 overflow-y-auto font-mono text-[11px] whitespace-pre-wrap leading-relaxed"
-              style={{ color: error ? '#f87171' : infoMessage ? '#4ade80' : '#4ade80' }}
-            >
-              {infoMessage || error || 'Build Successful. No errors reported.'}
-            </pre>
-          </div>
-      </div>
-
-      {/* Right Column */}
-      <div className="w-1/2 bg-[#1e1e1e] flex flex-col">
-        {pdfUrl ? (
-          <iframe 
-            key={pdfUrl} // Using key forces iframe to re-mount correctly only when URL changes
-            src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0`} 
-            className="w-full h-full border-none" 
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full text-gray-600 gap-4">
-            <div className="w-12 h-12 border-4 border-gray-700 border-t-blue-500 rounded-full animate-spin"></div>
-            <p className="text-sm font-medium">Booting PDF Engine...</p>
-          </div>
-        )}
-      </div>
+        }
+        rightLabel="PDF Preview"
+        defaultLeftWidth={55}
+        minLeftWidth={30}
+        maxLeftWidth={75}
+      />
     </main>
   );
 }

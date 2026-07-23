@@ -2,9 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
-:root, body {
+/* ===== Theme Variables ===== */
+:root,
+.dark-theme {
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --bg-tertiary: #030712;
+  --bg-editor: #1e1e1e;
+  --bg-console: #0a0a0a;
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --border-primary: #374151;
+  --border-secondary: #1f2937;
+  --accent-blue: #60a5fa;
+  --accent-green: #34d399;
+  --accent-red: #f87171;
+  --header-bg: #1f2937;
+  --sidebar-bg: #030712;
+  --hover-bg: rgba(255, 255, 255, 0.05);
+}
+
+.light-theme {
+  --bg-primary: #f9fafb;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f3f4f6;
+  --bg-editor: #ffffff;
+  --bg-console: #f9fafb;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --border-primary: #e5e7eb;
+  --border-secondary: #d1d5db;
+  --accent-blue: #2563eb;
+  --accent-green: #059669;
+  --accent-red: #dc2626;
+  --header-bg: #ffffff;
+  --sidebar-bg: #f3f4f6;
+  --hover-bg: rgba(0, 0, 0, 0.05);
+}
+
+html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Prevents double scrollbars with the editor */
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* ===== Theme utility classes ===== */
+.bg-theme-primary { background-color: var(--bg-primary); }
+.bg-theme-secondary { background-color: var(--bg-secondary); }
+.bg-theme-tertiary { background-color: var(--bg-tertiary); }
+.bg-theme-editor { background-color: var(--bg-editor); }
+.bg-theme-console { background-color: var(--bg-console); }
+.bg-theme-sidebar { background-color: var(--sidebar-bg); }
+.bg-theme-header { background-color: var(--header-bg); }
+
+.text-theme-primary { color: var(--text-primary); }
+.text-theme-secondary { color: var(--text-secondary); }
+.text-theme-muted { color: var(--text-muted); }
+
+.border-theme-primary { border-color: var(--border-primary); }
+.border-theme-secondary { border-color: var(--border-secondary); }
+
+/* ===== Scrollbar styling ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }

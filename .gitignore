@@ -215,3 +215,23 @@ __marimo__/
 
 # Docker secrets.
 .secrets
+
+# Environment files (matches .env, .env.local, .env.development, etc.)
+.env*
+
+# Frontend build artifacts (also covered by frontend/.gitignore)
+.next/
+node_modules/
+
+# IDE and editor
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/
