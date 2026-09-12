@@ -49,6 +49,7 @@ RUN echo "deb http://deb.debian.org/debian bookworm main contrib non-free" > /et
     ttf-mscorefonts-installer \
     pandoc \
     curl \
+    postgresql-client \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy virtual environment from builder.
@@ -69,6 +70,9 @@ RUN fc-list | grep -i "Times New Roman" && fc-list | grep -i "Fontin"
 # Copy source code and set permissions.
 COPY --chown=appuser:appuser . .
 
+# Make startup script executable
+RUN chmod +x scripts/startup.sh
+
 USER appuser
 
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
@@ -76,4 +80,5 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+ENTRYPOINT ["scripts/startup.sh"]
+CMD ["--reload"]

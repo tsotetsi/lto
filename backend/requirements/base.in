@@ -10,6 +10,10 @@ alembic==1.18.4
 asyncpg==0.31.0
 sqlalchemy==2.0.48
 
+## Authentication ##
+python-jose[cryptography]==3.5.0
+passlib[bcrypt]==1.7.4
+
 ## Logging and Monitoring ##
 structlog==25.5.0
 python-logging-loki==0.3.1

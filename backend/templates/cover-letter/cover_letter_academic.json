@@ -1,0 +1,175 @@
+{
+  "id": "cover_letter_academic",
+  "name": "Academic Cover Letter",
+  "description": "Formal academic letter for faculty, research, or teaching positions with publications list",
+  "category": "cover-letter",
+  "thumbnail": null,
+  "tex_content": "\\documentclass[a4paper,11pt]{article}\n\\usepackage{fontspec}\n\\usepackage{geometry}\n\\usepackage{parskip}\n\\usepackage{hyperref}\n\\usepackage{tabularx}\n\n\\geometry{margin=1in}\n\\setlength{\\parskip}{6pt}\n\n\\setmainfont{{{font}}}\n\n\\begin{document}\n\n\\begin{flushleft}\n    {\\Large\\bfseries {{sender_name}}}\\\\\n    {{sender_department}}\\\\\n    {{sender_institution}}\\\\\n    {{sender_address}}\\\\\n    \\href{mailto:{{sender_email}}}{{{sender_email}}} $\\mid$ {{sender_phone}}\\\\\n    \\href{{{website}}}{{{website}}}\n\\end{flushleft}\n\n\\vspace{16pt}\n\n{{date}}\n\n\\vspace{12pt}\n\n{{search_committee}}\\\\\n{{department}}\\\\\n{{institution}}\\\\\n{{institution_address}}\\\\\n{{institution_city}}, {{institution_state}} {{institution_zip}}\n\n\\vspace{12pt}\n\n\\textbf{Re: {{position_title}}}\n\n\\vspace{10pt}\n\n{{opening}}\n\n\\vspace{8pt}\n\n{{body_research}}\n\n\\vspace{8pt}\n\n{{body_teaching}}\n\n\\vspace{8pt}\n\n{{body_service}}\n\n\\vspace{8pt}\n\n\\begin{tabularx}{\\textwidth}{@{}>{\\bfseries}l@{\\hspace{2em}}X@{}}\n    \\multicolumn{2}{@{}l}{\\textbf{Selected Publications}} \\\\\n    \\hline\n    {{publications}}\n\\end{tabularx}\n\n\\vspace{12pt}\n\n{{closing}}\n\n\\vspace{24pt}\n\nSincerely,\\\\\n{\\bfseries {{sender_name}}}\\\\\n{{sender_title}}\n\n\\end{document}",
+  "variables": {
+    "sender_name": {
+      "name": "sender_name",
+      "label": "Your Full Name",
+      "default": "Dr. Alexandra Rivera",
+      "required": true,
+      "type": "text"
+    },
+    "sender_department": {
+      "name": "sender_department",
+      "label": "Your Department",
+      "default": "Department of Computer Science",
+      "required": true,
+      "type": "text"
+    },
+    "sender_institution": {
+      "name": "sender_institution",
+      "label": "Your Current Institution",
+      "default": "University of Technology",
+      "required": true,
+      "type": "text"
+    },
+    "sender_address": {
+      "name": "sender_address",
+      "label": "Your Office Address",
+      "default": "123 University Ave, Research Park",
+      "required": true,
+      "type": "text"
+    },
+    "sender_email": {
+      "name": "sender_email",
+      "label": "Your Email",
+      "default": "arivera@university.edu",
+      "required": true,
+      "type": "email"
+    },
+    "sender_phone": {
+      "name": "sender_phone",
+      "label": "Your Phone",
+      "default": "+1 (555) 789-0123",
+      "required": false,
+      "type": "phone"
+    },
+    "sender_title": {
+      "name": "sender_title",
+      "label": "Your Current Title",
+      "default": "Assistant Professor",
+      "required": false,
+      "type": "text"
+    },
+    "website": {
+      "name": "website",
+      "label": "Personal Website / ORCID",
+      "default": "https://alexrivera.dev",
+      "required": false,
+      "type": "url"
+    },
+    "date": {
+      "name": "date",
+      "label": "Date",
+      "default": "\\today",
+      "required": true,
+      "type": "text"
+    },
+    "search_committee": {
+      "name": "search_committee",
+      "label": "Search Committee Chair",
+      "default": "Professor Maria Chen, Chair",
+      "required": true,
+      "type": "text"
+    },
+    "department": {
+      "name": "department",
+      "label": "Department Name",
+      "default": "Department of Computer Science and Engineering",
+      "required": true,
+      "type": "text"
+    },
+    "institution": {
+      "name": "institution",
+      "label": "Institution Name",
+      "default": "State University",
+      "required": true,
+      "type": "text"
+    },
+    "institution_address": {
+      "name": "institution_address",
+      "label": "Institution Street Address",
+      "default": "1 College Circle",
+      "required": true,
+      "type": "text"
+    },
+    "institution_city": {
+      "name": "institution_city",
+      "label": "City",
+      "default": "College Town",
+      "required": true,
+      "type": "text"
+    },
+    "institution_state": {
+      "name": "institution_state",
+      "label": "State / Province",
+      "default": "CA",
+      "required": false,
+      "type": "text"
+    },
+    "institution_zip": {
+      "name": "institution_zip",
+      "label": "Postal Code",
+      "default": "90210",
+      "required": false,
+      "type": "text"
+    },
+    "position_title": {
+      "name": "position_title",
+      "label": "Position Title",
+      "default": "Tenure-Track Assistant Professor in Computer Science",
+      "required": true,
+      "type": "text"
+    },
+    "opening": {
+      "name": "opening",
+      "label": "Opening Paragraph",
+      "default": "Dear Professor Chen and members of the Search Committee,",
+      "required": true,
+      "type": "text"
+    },
+    "body_research": {
+      "name": "body_research",
+      "label": "Research Statement",
+      "default": "I am writing to apply for the Tenure-Track Assistant Professor position in Computer Science. I am currently an Assistant Professor at the University of Technology, where I lead the Systems and Machine Learning Lab. My research sits at the intersection of distributed systems and machine learning, focusing on building efficient, fault-tolerant infrastructure for large-scale ML workloads. My work has been published in top-tier venues including OSDI, SOSP, and NeurIPS, and I have been awarded three NSF grants totalling $1.2M.",
+      "required": true,
+      "type": "multiline"
+    },
+    "body_teaching": {
+      "name": "body_teaching",
+      "label": "Teaching Philosophy",
+      "default": "I am deeply committed to teaching and mentoring the next generation of computer scientists. I have developed and taught four courses at both the undergraduate and graduate levels, including a new course on Machine Learning Engineering that grew from 15 to 80 students in two semesters. My teaching evaluations average 4.8/5.0, and I have supervised six PhD students and twelve Master's theses to completion.",
+      "required": true,
+      "type": "multiline"
+    },
+    "body_service": {
+      "name": "body_service",
+      "label": "Service & Diversity Contributions",
+      "default": "I serve on the program committees of SOSP and EuroSys, and I co-chair the ACM SIGOPS Doctoral Dissertation Award committee. At my current institution, I founded the Women in Computing mentorship programme, which has grown to 120 participants, and I serve on the Faculty Diversity and Inclusion Council.",
+      "required": false,
+      "type": "multiline"
+    },
+    "publications": {
+      "name": "publications",
+      "label": "Selected Publications (one per line)",
+      "default": "1. Rivera, A., \\textit{et al.} ``Scalable ML Training on Heterogeneous Clusters'' -- OSDI 2025.\\\\\n2. Rivera, A. and Kumar, S. ``Fault-Tolerant Model Serving at Scale'' -- SOSP 2024.\\\\\n3. Rivera, A., \\textit{et al.} ``Learned Index Structures for Distributed Storage'' -- NeurIPS 2023.",
+      "required": false,
+      "type": "multiline"
+    },
+    "closing": {
+      "name": "closing",
+      "label": "Closing Paragraph",
+      "default": "I am excited about the opportunity to join State University's vibrant research community and contribute to its mission of excellence in research and education. I have enclosed my curriculum vitae, research statement, teaching statement, and three letters of reference. Thank you for your time and consideration.",
+      "required": true,
+      "type": "multiline"
+    }
+  },
+  "font": "Liberation Serif",
+  "created_at": "2026-07-23",
+  "updated_at": "2026-07-23",
+  "is_free": true
+}

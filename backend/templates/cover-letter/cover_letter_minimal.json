@@ -1,0 +1,91 @@
+{
+  "id": "cover_letter_minimal",
+  "name": "Minimal Cover Letter",
+  "description": "Short, direct, and scannable cover letter for quick applications",
+  "category": "cover-letter",
+  "thumbnail": null,
+  "tex_content": "\\documentclass[a4paper,11pt]{article}\n\\usepackage{fontspec}\n\\usepackage{geometry}\n\\usepackage{parskip}\n\\usepackage{hyperref}\n\n\\geometry{margin=0.75in}\n\\setlength{\\parskip}{8pt}\n\n\\setmainfont{{{font}}}\n\n\\begin{document}\n\n\\noindent{\\huge\\bfseries {{sender_name}}}\\\\\n{\\small \\href{mailto:{{sender_email}}}{{{sender_email}}} $\\cdot$ {{sender_phone}} $\\cdot$ \\href{{{portfolio_url}}}{{{portfolio_url}}}}\n\n\\vspace{16pt}\n\n{{date}}\n\n\\vspace{8pt}\n\n{{recipient_name}}\\\\\n{{recipient_company}}\n\n\\vspace{12pt}\n\n\\textbf{Re: {{position}}}\n\n\\vspace{8pt}\n\n{{opening}}\n\n\\vspace{6pt}\n\n{{body}}\n\n\\vspace{6pt}\n\n{{closing}}\n\n\\vspace{20pt}\n\nBest,\\\\\n{\\bfseries {{sender_name}}}\n\n\\end{document}",
+  "variables": {
+    "sender_name": {
+      "name": "sender_name",
+      "label": "Your Name",
+      "default": "Marcus Johnson",
+      "required": true,
+      "type": "text"
+    },
+    "sender_email": {
+      "name": "sender_email",
+      "label": "Your Email",
+      "default": "marcus@example.com",
+      "required": true,
+      "type": "email"
+    },
+    "sender_phone": {
+      "name": "sender_phone",
+      "label": "Your Phone",
+      "default": "+1 (555) 987-6543",
+      "required": false,
+      "type": "phone"
+    },
+    "portfolio_url": {
+      "name": "portfolio_url",
+      "label": "Portfolio / LinkedIn URL",
+      "default": "linkedin.com/in/marcusjohnson",
+      "required": false,
+      "type": "url"
+    },
+    "date": {
+      "name": "date",
+      "label": "Date",
+      "default": "\\today",
+      "required": true,
+      "type": "text"
+    },
+    "recipient_name": {
+      "name": "recipient_name",
+      "label": "Recipient Name",
+      "default": "Sarah Williams",
+      "required": true,
+      "type": "text"
+    },
+    "recipient_company": {
+      "name": "recipient_company",
+      "label": "Company Name",
+      "default": "InnovateCorp",
+      "required": true,
+      "type": "text"
+    },
+    "position": {
+      "name": "position",
+      "label": "Position Title",
+      "default": "Software Engineer Application",
+      "required": true,
+      "type": "text"
+    },
+    "opening": {
+      "name": "opening",
+      "label": "Salutation",
+      "default": "Dear Sarah,",
+      "required": true,
+      "type": "text"
+    },
+    "body": {
+      "name": "body",
+      "label": "Body (2-3 short paragraphs)",
+      "default": "I'm writing to apply for the Software Engineer role at InnovateCorp. With six years of experience building full-stack web applications at companies like TechStartup and CloudBase, I bring strong product engineering skills and a bias toward clean, maintainable code.\n\nAt CloudBase, I led the rewrite of our core API platform, reducing p99 latency from 450ms to 80ms and cutting infrastructure costs by 40%. I also introduced automated end-to-end testing that caught 95% of regressions before deployment. I'm particularly drawn to InnovateCorp's mission of democratizing access to data analytics tools, and I would be excited to contribute my experience to your team.",
+      "required": true,
+      "type": "multiline"
+    },
+    "closing": {
+      "name": "closing",
+      "label": "Closing",
+      "default": "I'd love the chance to chat more about how I can contribute to InnovateCorp. Thanks for your time and consideration.",
+      "required": true,
+      "type": "multiline"
+    }
+  },
+  "font": "Liberation Sans",
+  "created_at": "2026-07-23",
+  "updated_at": "2026-07-23",
+  "is_free": true
+}

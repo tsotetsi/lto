@@ -46,5 +46,4 @@ Dockerfile
 
 # Tests and misc
 tests/
-scripts/
 migrations/versions/

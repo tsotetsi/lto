@@ -23,6 +23,7 @@ class SnippetUpdate(SnippetBase):
 
 class SnippetResponse(SnippetBase):
     id: UUID
+    user_id: UUID | None = None
     display_name: str  # This will be the custom name if it exists, otherwise the default.
     created_at: datetime
     updated_at: datetime

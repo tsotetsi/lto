@@ -46,8 +46,15 @@ class Settings(BaseSettings):
         "POSTGRES_USER",
         "POSTGRES_PASSWORD",
         "SECRET_KEY",
+        "JWT_SECRET_KEY",
         mode="before"
     )(resolve_secret)
+
+    # JWT Configuration
+    # Falls back to SECRET_KEY if JWT-specific file doesn't exist (dev convenience)
+    JWT_SECRET_KEY: str = Field("", validation_alias="JWT_SECRET_KEY_FILE")
+    JWT_ALGORITHM: str = Field("HS256")
+    JWT_EXPIRATION_MINUTES: int = Field(1440)  # 24 hours
 
     # Monitoring Configurations
     GRAFANA_LOKI_URL: str = Field("http://loki:3100")

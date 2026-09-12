@@ -17,6 +17,12 @@ class Snippet(Base):
         primary_key=True,
         server_default=func.gen_random_uuid(),
     )
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )  # Owner; NULL for system-provided snippets
     internal_name = Column(Text, nullable=False, unique=True)
     default_display_name = Column(Text, nullable=False)
     description = Column(Text, nullable=True)
@@ -35,6 +41,7 @@ class Snippet(Base):
         default=datetime.utcnow,
     )
 
+    owner = relationship("User", backref="snippets", lazy="joined")
     preferences = relationship("UserSnippetPreference", back_populates="snippet")
 
 

@@ -11,6 +11,7 @@ from config import get_settings
 from utils.logging import setup_logging
 from services import compile_latex, compile_docx, ResumeRequest
 from templates.router import router as tmpl_router
+from auth.router import router as auth_router
 
 # Resumes router requires DB — import lazily so the app starts without Postgres.
 try:
@@ -71,6 +72,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(tmpl_router, prefix="")
+app.include_router(auth_router, prefix="/api")
 if snippets_router is not None:
     app.include_router(snippets_router, prefix="/api")
 

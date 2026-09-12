@@ -8,15 +8,6 @@ from fastapi.testclient import TestClient
 from main import app
 
 
-# ── Fixtures ──────────────────────────────────────────────────────────────────
-
-@pytest.fixture
-def client():
-    """FastAPI TestClient bound to the main app."""
-    with TestClient(app) as c:
-        yield c
-
-
 # ── Health ────────────────────────────────────────────────────────────────────
 
 class TestHealthEndpoint:

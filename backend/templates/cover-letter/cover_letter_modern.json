@@ -1,0 +1,119 @@
+{
+  "id": "cover_letter_modern",
+  "name": "Modern Cover Letter",
+  "description": "Clean, contemporary design with a subtle accent bar and concise layout",
+  "category": "cover-letter",
+  "thumbnail": null,
+  "tex_content": "\\documentclass[a4paper,11pt]{article}\n\\usepackage{fontspec}\n\\usepackage{geometry}\n\\usepackage{xcolor}\n\\usepackage{parskip}\n\\usepackage{hyperref}\n\\usepackage{tcolorbox}\n\n\\geometry{margin=0.8in}\n\\setlength{\\parskip}{6pt}\n\n\\definecolor{accent}{RGB}{41, 128, 185}\n\\setmainfont{{{font}}}\n\n\\begin{document}\n\n% Accent header bar\n\\begin{tcolorbox}[colback=accent!10, colframe=accent, sharp corners, boxrule=0.5pt, left=12pt, right=12pt, top=6pt, bottom=6pt]\n{\\Large\\bfseries\\color{accent} {{sender_name}}} \\hfill {\\small \\href{mailto:{{sender_email}}}{{{sender_email}}} $\\cdot$ \\href{tel:{{sender_phone}}}{{{sender_phone}}}}\n\\end{tcolorbox}\n\n\\vspace{16pt}\n\n{{date}}\n\n\\vspace{12pt}\n\n{{recipient_name}}\\\\\n{{recipient_title}}\\\\\n{{recipient_company}}\\\\\n{{recipient_address}}\\\\\n{{recipient_city}}, {{recipient_postal_code}}\n\n\\vspace{12pt}\n\n\\textbf{Re: {{subject}}}\n\n\\vspace{10pt}\n\n{{opening}}\n\n\\vspace{8pt}\n\n{{body_first}}\n\n\\vspace{8pt}\n\n{{body_second}}\n\n\\vspace{8pt}\n\n\\begin{tcolorbox}[colback=gray!5, colframe=gray!30, sharp corners, boxrule=0.3pt, left=8pt, right=8pt, top=4pt, bottom=4pt]\n{{closing}}\n\\end{tcolorbox}\n\n\\vspace{12pt}\n\n\\begin{flushright}\n    Sincerely,\\\\\n    {\\bfseries {{sender_name}}}\n\\end{flushright}\n\n\\end{document}",
+  "variables": {
+    "sender_name": {
+      "name": "sender_name",
+      "label": "Your Full Name",
+      "default": "Jane Doe",
+      "required": true,
+      "type": "text"
+    },
+    "sender_email": {
+      "name": "sender_email",
+      "label": "Your Email",
+      "default": "jane@example.com",
+      "required": true,
+      "type": "email"
+    },
+    "sender_phone": {
+      "name": "sender_phone",
+      "label": "Your Phone",
+      "default": "+1 (555) 123-4567",
+      "required": false,
+      "type": "phone"
+    },
+    "recipient_name": {
+      "name": "recipient_name",
+      "label": "Recipient Name",
+      "default": "Dr. John Smith",
+      "required": true,
+      "type": "text"
+    },
+    "recipient_title": {
+      "name": "recipient_title",
+      "label": "Recipient Title",
+      "default": "Hiring Manager",
+      "required": true,
+      "type": "text"
+    },
+    "recipient_company": {
+      "name": "recipient_company",
+      "label": "Company Name",
+      "default": "TechCorp Ltd.",
+      "required": true,
+      "type": "text"
+    },
+    "recipient_address": {
+      "name": "recipient_address",
+      "label": "Company Street Address",
+      "default": "456 Innovation Drive",
+      "required": true,
+      "type": "text"
+    },
+    "recipient_city": {
+      "name": "recipient_city",
+      "label": "City",
+      "default": "San Francisco",
+      "required": true,
+      "type": "text"
+    },
+    "recipient_postal_code": {
+      "name": "recipient_postal_code",
+      "label": "Postal Code",
+      "default": "94105",
+      "required": false,
+      "type": "text"
+    },
+    "date": {
+      "name": "date",
+      "label": "Date",
+      "default": "\\today",
+      "required": true,
+      "type": "text"
+    },
+    "subject": {
+      "name": "subject",
+      "label": "Subject Line",
+      "default": "Application for Senior Software Engineer Position",
+      "required": true,
+      "type": "text"
+    },
+    "opening": {
+      "name": "opening",
+      "label": "Salutation",
+      "default": "Dear Dr. Smith,",
+      "required": true,
+      "type": "text"
+    },
+    "body_first": {
+      "name": "body_first",
+      "label": "Body Paragraph 1",
+      "default": "I am writing to express my enthusiasm for the Senior Software Engineer position at TechCorp. With over eight years of experience delivering high-scale distributed systems and a track record of leading cross-functional teams, I am confident I can make an immediate impact on your engineering organisation.",
+      "required": true,
+      "type": "multiline"
+    },
+    "body_second": {
+      "name": "body_second",
+      "label": "Body Paragraph 2",
+      "default": "Most recently at ScaleUp Inc., I architected a real-time data pipeline processing 10M+ events daily, reducing latency by 60% and infrastructure costs by 35%. I championed a migration from monolithic to microservice architecture that improved deployment frequency from weekly to multiple times per day, all while maintaining 99.95% uptime. I also mentored four junior engineers and established pair-programming practices that lifted team velocity by 25%.",
+      "required": true,
+      "type": "multiline"
+    },
+    "closing": {
+      "name": "closing",
+      "label": "Closing Statement",
+      "default": "I would welcome the opportunity to discuss how my experience in building resilient systems and leading engineering teams aligns with TechCorp's ambitious roadmap. Thank you for your time and consideration.",
+      "required": true,
+      "type": "multiline"
+    }
+  },
+  "font": "Liberation Sans",
+  "created_at": "2026-07-23",
+  "updated_at": "2026-07-23",
+  "is_free": true
+}
