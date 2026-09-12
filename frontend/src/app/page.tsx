@@ -5,25 +5,14 @@ import Editor, { OnMount } from '@monaco-editor/react';
 import axios from 'axios';
 import SplitPane from './components/SplitPane';
 import ThemeToggle from './components/ThemeToggle';
+import UserMenu from './components/UserMenu';
 import { useTheme } from './context/ThemeContext';
+import { AVAILABLE_FONTS } from './data/fonts';
 
 const STORAGE_KEYS = {
   CODE: 'cv_editor_code',
   FONT: 'cv_editor_font'
 };
-
- const AVAILABLE_FONTS = [
-   "Liberation Sans",
-   "Liberation Serif",
-   "Liberation Mono",
-   "Fontin", // Bundled custom font.
-   "Times New Roman",
-   "Arial",
-   "Comic Sans MS",
-   "Courier New",
-   "Georgia",
-   "Verdana"
- ];
 
 const RESUME_SNIPPETS = [
   {
@@ -390,6 +379,7 @@ export default function CVEditor() {
 
               <div className="flex-1" />
 
+              <UserMenu />
               <ThemeToggle />
 
               {isCompiling && (
